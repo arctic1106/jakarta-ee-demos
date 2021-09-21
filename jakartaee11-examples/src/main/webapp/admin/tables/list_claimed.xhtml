@@ -1,0 +1,37 @@
+<div id="id_list_compl_cargoes" xmlns:h="jakarta.faces.html"
+     xmlns:f="jakarta.faces.core">
+    <div class="section-heading">
+        <div>
+            <h2>Claimed cargo</h2>
+            <p>Completed shipments collected at destination.</p>
+        </div>
+    </div>
+    <h:dataTable var="cargo" value="#{listCargo.claimedCargos}" style="text-align: center; width: 100%;">
+        <h:column>
+            <f:facet name="header">Tracking ID</f:facet>
+            <h:link value="#{cargo.trackingId.idString}" id="trackingId" outcome="/admin/show.xhtml"
+                    style="text-decoration: none;" title="Click to see history.">
+                <f:param name="trackingId" value="#{cargo.trackingId.idString}"/>
+            </h:link>
+        </h:column>
+
+        <h:column>
+            <f:facet name="header">Origin</f:facet>
+            <h:outputText value="#{cargo.origin.name}  "/>
+            <br/>
+            <h:outputText value="#{cargo.origin.unLoCode.code}" style="color: #999999;font-size:.8em;"/>
+        </h:column>
+
+        <h:column>
+            <f:facet name="header">Destination</f:facet>
+            <h:outputText value="#{cargo.routeSpecification.destination.name}  "/>
+            <br/>
+            <h:outputText value="#{cargo.routeSpecification.destination.unLoCode.code}" style="color: #999999;font-size:.8em;"/>
+        </h:column>
+
+        <h:column>
+            <f:facet name="header">Deadline</f:facet>
+            <h:outputText value="#{cargo.routeSpecification.arrivalDeadline}"/>
+        </h:column>
+    </h:dataTable>
+</div>

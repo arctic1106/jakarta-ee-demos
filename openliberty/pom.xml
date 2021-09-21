@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.arcticsoft</groupId>
+	<artifactId>openliberty</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>openliberty</name>
+	<description>Jakarta EE 11 on Open Liberty (CDI + Servlet + JSP)</description>
+	<packaging>war</packaging>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.release>21</maven.compiler.release>
+		<jakarta.ee.version>11.0.0</jakarta.ee.version>
+		<liberty.plugin.version>3.11.1</liberty.plugin.version>
+		<liberty.var.http.port>20493</liberty.var.http.port>
+	</properties>
+
+	<dependencies>
+		<!-- Jakarta EE 11 APIs (provided by Open Liberty) -->
+		<dependency>
+			<groupId>jakarta.platform</groupId>
+			<artifactId>jakarta.jakartaee-api</artifactId>
+			<version>${jakarta.ee.version}</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<finalName>openliberty</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>3.4.0</version>
+			</plugin>
+			<!-- mvn liberty:dev  →  http://localhost:8085/openliberty/ -->
+			<plugin>
+				<groupId>io.openliberty.tools</groupId>
+				<artifactId>liberty-maven-plugin</artifactId>
+				<version>${liberty.plugin.version}</version>
+				<configuration>
+					<serverName>bookServer</serverName>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

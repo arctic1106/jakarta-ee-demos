@@ -1,0 +1,48 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="jakarta.faces.core"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="/WEB-INF/templates/common/admin.xhtml">
+    <ui:define name="title">System Load</ui:define>
+    <ui:define name="content">
+        <div class="content-narrow">
+            <div class="panel">
+                <p class="page-kicker">Runtime telemetry</p>
+                <h2>System load</h2>
+                <p>Runtime CPU load and heap memory usage for this Cargo Tracker server.</p>
+
+                <h:form id="systemLoadForm">
+                    <h:commandButton id="refresh" value="Refresh" action="#{systemLoad.refresh}">
+                        <f:ajax execute="@this" render="samples" />
+                    </h:commandButton>
+
+                    <h:dataTable id="samples" value="#{systemLoad.samples}" var="sample"
+                                 styleClass="system-load-table"
+                                 headerClass="system-load-table-header"
+                                 rowClasses="system-load-table-odd,system-load-table-even">
+                        <h:column>
+                            <f:facet name="header">Time</f:facet>
+                            <h:outputText value="#{sample.time}">
+                                <f:convertDateTime type="localDateTime" pattern="yyyy-MM-dd HH:mm:ss" />
+                            </h:outputText>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">CPU load (%)</f:facet>
+                            <h:outputText value="#{sample.cpuLoad}">
+                                <f:convertNumber pattern="0.00" />
+                            </h:outputText>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Heap memory usage (%)</f:facet>
+                            <h:outputText value="#{sample.memoryUsage}">
+                                <f:convertNumber pattern="0.00" />
+                            </h:outputText>
+                        </h:column>
+                    </h:dataTable>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>
+</html>

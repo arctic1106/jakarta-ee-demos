@@ -1,0 +1,108 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:fn="jakarta.tags.functions">
+<ui:composition template="/WEB-INF/templates/common/admin.xhtml">
+    <!-- In a template client anything outside <ui:define> is discarded, and the
+         <f:metadata> element itself must be declared here, not in the template. -->
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="trackingId" value="#{itinerarySelection.trackingId}" required="true"/>
+            <f:viewAction action="#{itinerarySelection.load}"/>
+        </f:metadata>
+    </ui:define>
+    <ui:define name="title">Route Cargo</ui:define>
+    <ui:define name="content">
+        <div class="ui-grid-col-2" id="leftCol"></div>
+        <div class="ui-grid-col-8" id="mainCol">
+            <br/>
+            <span style="font-size: 2em; font-weight: bold;">Set Route for Cargo #{itinerarySelection.cargo.trackingId.idString}</span>
+            <hr/>
+            <h:panelGrid columns="2" styleClass="registrationPanelGrid" cellpadding="5">
+                <span style="color:#5392c3;font-weight: bold;">Origin:</span>
+                <h:panelGroup>
+                    <h:outputText value="#{itinerarySelection.cargo.origin.name}"/>
+                    <h:outputText value="&#160;&#160;#{itinerarySelection.cargo.origin.unLoCode.code}" style="color: #999999;font-size:.9em;"/>
+                </h:panelGroup>
+                <span style="color: #5392c3;font-weight: bold;">Destination:</span>
+                <h:panelGroup>
+                    <h:outputText value="#{itinerarySelection.cargo.routeSpecification.destination.name}"/>
+                    <h:outputText value="&#160;&#160;#{itinerarySelection.cargo.routeSpecification.destination.unLoCode.code}" style="color: #999999;font-size:.9em;"/>
+                </h:panelGroup>
+                <span style="color: #5392c3;font-weight: bold;">Arrival deadline:</span>
+                <h:panelGroup>
+                    <h:outputText value="#{itinerarySelection.cargo.routeSpecification.arrivalDeadline}"/>
+                </h:panelGroup>
+                <span style="color: #5392c3;font-weight: bold;">Potential routes:</span>
+                <h:panelGroup>
+                    <h:outputText value="#{itinerarySelection.routeCandidates.size()}"/>
+                </h:panelGroup>
+            </h:panelGrid>
+            <hr/>
+            <h:panelGroup rendered="#{empty itinerarySelection.routeCandidates}">
+                <p>
+                    <span class="notice-danger" aria-hidden="true">⚠</span> No
+                    routes found that satisfy the route specification. Try setting an
+                    arrival deadline further into the future.
+                </p>
+            </h:panelGroup>
+
+            <ui:repeat value="#{itinerarySelection.routeCandidates}" var="itinerary" varStatus="itineraryStatus">
+                <div class="ui-g ui-g-12">
+                    <div class="ui-g-3" style="font-size: 1.5em; padding: 10px;">
+                        <span class="success label">Route option ##{itineraryStatus.index + 1}</span>
+                    </div>
+                    <div class="ui-g-1 ui-g-offset-8" style="font-size: 1.5em; padding: 10px;">
+                        <h:form>
+                            <h:commandLink action="#{itinerarySelection.assignItinerary(itineraryStatus.index)}"
+                                           style="text-decoration: none;">
+                                <span style="color: #e8b44b; font-weight: bold;">Select</span>
+                            </h:commandLink>
+                        </h:form>
+                    </div>
+                    <div class="ui-g-12">
+                        <h:dataTable var="leg" value="#{itinerary.legs}"
+                                     style="text-align: center; width: 100%;"
+                                     title="Hit 'Select' to assign this candidate itinerary to the cargo">
+                            <h:column>
+                                <f:facet name="header">Voyage</f:facet>
+                                <h:outputText value="#{leg.voyage.voyageNumber.idString}" style="color: #9b2332"/>
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Load</f:facet>
+                                <h:outputText value="#{leg.loadLocation.name}"
+                                              style="font-weight: #{fn:startsWith(itinerarySelection.cargo.origin.name, leg.loadLocation.name) ? 'bold' : 'normal'}"/>
+                                <ui:fragment rendered="${fn:startsWith(itinerarySelection.cargo.origin.name, leg.loadLocation.name)}">
+                                    <span aria-hidden="true">→</span>
+                                </ui:fragment>
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Time</f:facet>
+                                <h:outputText value="#{leg.loadTime}">
+                                    <f:convertDateTime pattern="M/d/yyyy HH:mm" type="localDateTime"/>
+                                </h:outputText>
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Unload</f:facet>
+                                <ui:fragment rendered="${fn:startsWith(itinerarySelection.cargo.routeSpecification.destination.name, leg.unloadLocation.name)}">
+                                    <span aria-hidden="true">→</span>
+                                </ui:fragment>
+                                <h:outputText value="#{leg.unloadLocation.name}"
+                                              style="font-weight: #{fn:startsWith(itinerarySelection.cargo.routeSpecification.destination.name, leg.unloadLocation.name) ? 'bolder' : 'normal'}"/>
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Time</f:facet>
+                                <h:outputText value="#{leg.unloadTime}">
+                                    <f:convertDateTime pattern="M/d/yyyy HH:mm" type="localDateTime"/>
+                                </h:outputText>
+                            </h:column>
+                        </h:dataTable>
+                        <br/>
+                    </div>
+                </div>
+            </ui:repeat>
+        </div>
+    </ui:define>
+</ui:composition>
+</html>

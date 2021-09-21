@@ -1,0 +1,161 @@
+// Copyright (c) 2019 IBM Corporation and others.
+// Licensed under Creative Commons Attribution-NoDerivatives
+// 4.0 International (CC BY-ND 4.0)
+//   https://creativecommons.org/licenses/by-nd/4.0/
+//
+// Contributors:
+//     IBM Corporation
+//
+//
+//
+:page-description: Features are the discrete units of functionality by which you control the pieces of the runtime environment that are loaded into a particular server. By adding or removing features from your server configuration, you can control what functions the server can perform.
+:seo-title: Feature overview - OpenLiberty.io
+:projectName: Open Liberty
+:page-layout: feature
+:page-type: overview
+= Feature overview
+
+Features are the discrete units of functionality by which you control the pieces of the runtime environment that are loaded into a particular server.
+By adding or removing features from your server configuration, you can control what functions the server can perform.
+
+Features provide the programming models and services that applications require.
+You can specify any feature in the server configuration files.
+Some features include other features within them, and the same feature might be included in one or more other features.
+When the server is started, the JVM is launched and control is passed to the Open Liberty kernel.
+The configuration is loaded as described in the xref:config/server-configuration-overview.adoc[server configuration overview].
+When the configuration is parsed, the feature manager gains control and processes the `featureManager` configuration to load the requested features into the server and start the required components.
+Finally, the applications are started.
+When the configuration is changed, the feature manager reevaluates the code that is required for the newly requested features by starting and stopping parts of the runtime without restarting the server.
+Changes to applications are processed in a similar way.
+
+== Feature configuration
+Features are specified in the system configuration files that are the `server.xml` file and any other included files.
+The feature manager is configured by using the `featureManager` element in the `server.xml` file.
+Each feature that is required is configured by using the `feature` element.
+The following example configures the feature:servlet-4.0[display="Java Servlets 4.0"] (`servlet-4.0`) and feature:jdbc-4.3[display="Java Database Connectivity 4.3"] (`jdbc-4.3`) features:
+
+[source,xml]
+----
+<server>
+  <featureManager>
+    <feature>servlet-4.0</feature>
+    <feature>jdbc-4.3</feature>
+  </featureManager>
+</server>
+----
+
+The runtime contains default configuration settings so that the configuration you need to specify is kept to a minimum.
+Specify the features that you need, along with any additions or overrides to the default settings, in the `server.xml` file.
+For details about the server configuration, see the xref:config/server-configuration-overview.adoc[server configuration overview].
+
+Occasionally, Liberty features that are not listed in the `server.xml` file are enabled automatically by other features. To confirm whether a particular feature is enabled in a Liberty server, inspect the `CWWKF0012I` message in the `console.log`, `messages.log`, or `trace.log` from the Liberty server. This message provides a comprehensive list of all the features that are installed and running on the Liberty server.
+
+=== Feature combinations and compatibility
+Not all Open Liberty features and feature versions are interoperable and some combinations might result in compatibility errors if they are enabled in the same server configuration.
+
+To avoid compatibility issues, you can xref:reference:feature/versionless-features.adoc[configure versionless features] for any features that are part of the Java EE, Jakarta EE, or MicroProfile platforms.
+
+==== Singleton features and feature versions
+
+A singleton feature is a feature for which you can configure only one version per server. Most Open Liberty features are singleton features. If your server configuration includes multiple versions of the same singleton feature, either in the `server.xml` file or through feature dependencies, an error occurs and neither version of that feature loads.
+
+To resolve this problem, ensure that the configured features all specify, or tolerate, the same version of that singleton feature.
+If you have hard requirements on both feature versions, you must move some of your applications to a different server.
+
+==== MicroProfile, Jakarta EE, and Java EE features
+Open Liberty features that support the MicroProfile, Jakarta EE, and Java EE specifications are sensitive to the version of whatever platform specification they target. For example, features that support Jakarta EE 10 do not interoperate with features that support Jakarta EE 8. Errors occur if you enable these features in the same server configuration.
+
+To avoid these errors, you can xref:reference:feature/versionless-features.adoc[configure versionless features] for any features that are part of the Java EE, Jakarta EE, or MicroProfile platforms.
+Alternatively, to enable all the features that support a particular platform specification version, use the MicroProfile, Jakarta EE, or Java EE <<#conv,convenience features>>.
+
+For more information about migrating your applications from one version of a MicroProfile or Jakarta EE specification to another, see the relevant _Differences between..._ pages in the xref:microprofile-api.adoc[MicroProfile API] and xref:jakarta-ee-api.adoc[Jakarta EE API] sections of the documentation.
+
+==== Java EE 7 and Java EE 8 feature combinations
+Open Liberty doesn't support combining features from both Java EE 7 and Java EE 8, except when the Java EE 7 and Java EE 8 specifications share a component specification version.
+If you combine Java EE 7 and Java EE 8 features in a server configuration, the server reports errors at startup.
+
+The following features are included in both Java EE 7 and Java EE 8:
+
+* feature:appClientSupport-1.0[display="Application Client Support for Server 1.0"]
+* feature:batch-1.0[display="Batch API 1.0"]
+* feature:concurrent-1.0[display="Concurrency Utilities for Java EE 1.0"]
+* feature:ejb-3.2[display="Enterprise JavaBeans 3.2"]
+* feature:j2eeManagement-1.1[display="J2EE Management 1.1"]
+* feature:jacc-1.5[display="Java Authorization Contract for Containers 1.5"]
+* feature:jca-1.7[display="Java Connector Architecture 1.7"]
+* feature:jcaInboundSecurity-1.0[display="Java Connector Architecture Security Inflow 1.0"]
+* feature:jdbc-4.2[display="Java Database Connectivity 4.2"]
+* feature:jdbc-4.3[display="Java Database Connectivity 4.3"]
+* feature:jms-2.0[display="Java Message Service 2.0"]
+* feature:jaxws-2.2[display="Java Web Services 2.2"]
+* feature:wasJmsClient-2.0[display="JMS 2.0 Client for Message Server"]
+* feature:wasJmsServer-1.0[display="Message Server 1.0"]
+* feature:wasJmsSecurity-1.0[display="Message Server Security 1.0"]
+
+For a complete list of features that support Java EE 7, see the feature:javaee-7.0[display="Java EE Full Platform 7.0"] feature.
+For a complete list of features that support Java EE 8, see the feature:javaee-8.0[display="Java EE Full Platform 8.0"] feature.
+
+[#conv]
+=== Convenience features
+You can enable a whole set of features all at once by specifying one of the convenience features. Convenience features automatically enable all the individual Open Liberty features that are associated with a particular platform or functional area.
+For example, the Jakarta EE Platform feature enables all the features that are part of the xref:ROOT:jakarta-ee.adoc[Jakarta EE Platform].
+The Jakarta EE Web Profile feature enables only those features that are part of the Jakarta EE Web Profile. A list of all the features that a convenience feature enables is provided on the reference page for each convenience feature.
+Enable the convenience features by adding them to the `featureManager` element in your `server.xml` file.
+
+The following convenience features are available for the for Jakarta EE platform.
+
+* The feature:jakartaee[display=Jakarta EE Platform] feature enables all features that support the Jakarta EE platform.
+* The feature:webProfile[display=Jakarta EE Web Profile] feature enables only features that support the lightweight link:https://jakarta.ee/specifications/webprofile/9/[Jakarta EE Web Profile].
+* The feature:jakartaeeClient[display=Jakarta EE Application Client] feature enables all features that support the Jakarta EE link:https://jakarta.ee/specifications/platform/9/jakarta-platform-spec-9.html#a3294[Application Client] functions.
+
+Similar convenience features are available for the Java EE platform.
+
+* feature:javaee-8.0[display=Java EE Full Platform]
+* feature:webProfile-8.0[display=Java EE Web Profile]
+* feature:javaeeClient-8.0[display=Java EE Application Client]
+
+Open Liberty also provides two more convenience features.
+
+* The feature:microProfile[display=MicroProfile] convenience feature enables all the Open Liberty features that support the MicroProfile platform.
+* The feature:enterpriseBeans[display=Jakarta Enterprise Beans] convenience feature automatically enables all Open Liberty features that support enterprise beans functions.
+
+== Zero-migration architecture
+With the Open Liberty zero-migration architecture, you can move to the latest version of Open Liberty with minimal impact to your current applications and configurations.
+With the use of pluggable features in the Open Liberty runtime environment, your existing APIs and behaviors are supported in new product versions, and new APIs and behaviors are added in new features.
+An API behavior change is made available as a new version of a feature so that you can choose the appropriate feature version for your application.
+These versioned features continue to be supported across Open Liberty updates.
+If you continue to use the same feature version, you never need to migrate your application.
+For more information about zero migration with Open Liberty, see xref:ROOT:zero-migration-architecture.adoc[Zero-migration architecture].
+
+== Superseded features
+If a feature is superseded, a new feature or a combination of features might provide an advantage over the superseded feature.
+The new feature or features might not completely replace the function of the superseded feature, so you must consider your scenario before you decide whether to change your configuration.
+Superseded features remain supported and valid for use in your configuration, but you might be able to improve your configuration by using the newer features.
+
+Occasionally, a feature that includes other features is superseded by a new version of the feature that does not include all those features.
+The features that are not included in the new version are considered to be separated.
+If your application depends on the functions of a separated feature, you must explicitly add the separated feature to your configuration.
+
+The following table lists the Open Liberty features that are superseded:
+
+[%header,cols=3*]
+|===
+
+|Superseded feature
+|Superseding feature
+|Dependent feature removed
+
+|feature:appSecurity-1.0[display="Application Security 1.0"] (`appSecurity-1.0`)
+|feature:appSecurity-2.0[display="Application Security 2.0"] (`appSecurity-2.0`)
+|The feature:ldapRegistry-3.0[display="LDAP User Registry 3.0 feature"] (`ldapRegistry-3.0`) was removed from the definition of the Application Security 2.0 feature.
+
+|feature:jmsMdb-3.2[display="JMS Message-Driven Beans 3.2"] (`jmsMdb-3.2`)
+|feature:jms-2.0[display="Java Message Service 2.0"] (`jms-2.0`) and feature:mdb-3.2[display="Message-Driven Beans 3.2"] (`mdb-3.2`)
+|Together, the Java Message Service 2.0 and Message-Driven Beans 3.2 features provide the same function as the JMS Message-Driven Beans 3.2 feature.
+
+|feature:ssl-1.0[display="Secure Socket Layer 1.0"] (`ssl-1.0`)
+|feature:transportSecurity-1.0[display="Transport Security 1.0"] (`transportSecurity-1.0`)
+|The Secure Socket Layer 1.0 and Transport Security 1.0 features are functionally equivalent.
+However, the Secure Socket Layer 1.0 feature implies that an insecure network protocol is used, so the Transport Security 1.0 feature supersedes it.
+
+|===

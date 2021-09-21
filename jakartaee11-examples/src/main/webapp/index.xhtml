@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html">
+<h:head>
+    <title>Eclipse Cargo Tracker</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#07111f" />
+    <h:outputStylesheet name="css/title.css" />
+</h:head>
+<h:body>
+    <main class="landing">
+        <div class="landing-glow"></div>
+        <section class="landing-hero">
+            <a class="landing-brand" href="https://github.com/eclipse-ee4j/cargotracker/">
+                <h:graphicImage value="#{resource['images/CTlogobadge128.png']}" alt="" />
+                <span>Eclipse Cargo Tracker</span>
+            </a>
+
+            <p class="landing-kicker">Jakarta EE 11 reference application</p>
+            <h1>See the whole cargo journey.<br /><span>Act on what matters.</span></h1>
+            <p class="landing-lead">
+                A logistics application demonstrating modern Jakarta EE and MicroProfile APIs
+                through real booking, routing, tracking, and operations workflows.
+            </p>
+
+            <div class="landing-actions">
+                <a class="landing-button landing-button-primary" href="public/track.xhtml">Track a shipment</a>
+                <a class="landing-button" href="admin/dashboard.xhtml">Open operations</a>
+                <a class="landing-button" href="admin/dashboard.xhtml">Open operations</a>
+            </div>
+
+            <div class="landing-features" aria-label="Application capabilities">
+                <article>
+                    <strong>Live operations</strong>
+                    <span>SSE, WebSocket, maps, and cargo status</span>
+                </article>
+                <article>
+                    <strong>End-to-end workflows</strong>
+                    <span>Book, route, handle, and track cargo</span>
+                </article>
+                <article>
+                    <strong>Jakarta EE 11</strong>
+                    <span>Faces, REST, Data, Persistence, CDI, and more</span>
+                </article>
+            </div>
+        </section>
+
+        <aside class="landing-rail">
+            <div class="landing-rail-card">
+                <span class="landing-status"><i></i> Demo workspace</span>
+                <h2>Log a cargo event</h2>
+                <p>Record handling activity using the guided event logger.</p>
+                <a href="event-logger/index.xhtml">Open event logger <span aria-hidden="true">→</span></a>
+            </div>
+        </aside>
+    </main>
+</h:body>
+</html>

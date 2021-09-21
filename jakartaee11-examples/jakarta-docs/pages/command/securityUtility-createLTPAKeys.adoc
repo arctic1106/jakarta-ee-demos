@@ -1,0 +1,139 @@
+//
+// Copyright (c) 2020 IBM Corporation and others.
+// Licensed under Creative Commons Attribution-NoDerivatives
+// 4.0 International (CC BY-ND 4.0)
+//   https://creativecommons.org/licenses/by-nd/4.0/
+//
+// Contributors:
+//     IBM Corporation
+//
+:page-description: The `securityUtility createLTPAKeys` command creates a set of LTPA keys for use by the server, or that can be shared with multiple servers.
+:seo-title: securityUtility createLTPAKeys - OpenLiberty.io
+:seo-description: The `securityUtility createLTPAKeys` command creates a set of LTPA keys for use by the server, or that can be shared with multiple servers.
+:page-layout: general-reference
+:page-type: general
+= securityUtility createLTPAKeys
+
+The `securityUtility createLTPAKeys` command creates a set of LTPA keys for use by the server, or that can be shared with multiple servers.
+If no server or file is specified, an `ltpa.keys` file is created in the current working directory.
+
+For information about creating LTPA keys using FIPS 140-3 approved algorithms, see link:https://www.ibm.com/docs/en/was-liberty/nd?topic=liberty-setting-up-fips-compliance[Setting up Liberty for FIPS compliance].
+
+== Usage example
+
+Create LTPA keys with the `mypassword` password that is encrypted with Advanced Encryption Standard (AES) encryption:
+
+----
+securityUtility createLTPAKeys --password=mypassword --passwordEncoding=aes
+----
+
+Create LTPA keys by using a Base64-encoded AES key to encrypt the LTPA password, specify the `--passwordBase64Key` option:
+
+[source,sh]
+----
+securityUtility createLTPAKeys \
+  --password=password \
+  --passwordEncoding=aes \
+  --passwordBase64Key=<your_base64_key> \
+  --file=ltpa.keys
+----
+
+Create LTPA keys by using a configuration file that contains the AES key variable:
+
+[source,sh]
+----
+securityUtility createLTPAKeys \
+  --password=password \
+  --passwordEncoding=aes \
+  --aesConfigFile=aesConfig.xml \
+  --file=ltpa.keys
+----
+
+== Syntax
+
+Run the command from the `_path_to_liberty_/wlp/bin` directory.
+
+[subs=+quotes]
+----
+securityUtility createLTPAKeys --password=_pwd_ [_options_]
+----
+
+--password=__pwd__::
+The password for the LTPA key.
+If no value is specified, you're prompted for a value. when you run this command.
+
+== Options
+
+.Options for the securityUtility createLTPAKeys command
+[%header,cols=2*]
+|===
+|Option
+|Description
+
+|--file=_name_
+|The file in which to write the LTPA keys.
+This option can't be used if the `--server` option is specified.
+
+|--passwordEncoding=_password_encoding_type_
+|Specifies how to encode the LTPA keys password in the `server.xml` file.
+Supported encoding types are `xor` and `aes`.
+If this option isn't specified, a default encoding type of `xor` is used.
+{empty} +
+{empty} +
+You can use the `securityUtility encode --listCustom` command to see if any additional custom encryptions are supported.
+
+|--passwordKey=_password_encryption_key_
+|Specifies the key to use to encode an LTPA keys password with AES encryption.
+This string is hashed to produce an encryption key that is used to encrypt and decrypt the password.
+You can provide the key by defining the `wlp.password.encryption.key` variable as the key value.
+If this option isn't specified, a default key is used.
+This option cannot be combined with `--passwordBase64Key` or `--aesConfigFile`.
+
+|--passwordBase64Key=<key>
+|Specifies a Base64-encoded 256-bit AES key that is used to encrypt the generated LTPA password. 
+This option cannot be combined with `--aesConfigFile` or `--passwordKey`.
+
+|--aesConfigFile=<file>
+|Specifies an XML or Java properties file that contains either the `wlp.password.encryption.key` or `wlp.aes.encryption.key` variable. 
+Only one variable can be present in a file. 
+This option cannot be combined with `--passwordBase64Key` or `--passwordKey`.
+
+|--server=_name_
+|Specifies the name of the Open Liberty server for which the LTPA keys are created.
+This option can't be used if the `--file` option is specified.
+
+|===
+
+== Exit codes
+
+The following exit codes are available for the `securityUtility createLTPAKeys` command:
+
+.Exit codes for the securityUtility createLTPAKeys command
+[%header,cols="2,9"]
+|===
+
+|Code
+|Explanation
+
+|0
+|This code indicates successful completion of the requested operation.
+
+|1
+|This code indicates a generic error.
+
+|2
+|This code indicates that the server is not found.
+
+|3
+|This code indicates that the client is not found.
+
+|4
+|This code indicates that the path can not be created.
+
+|5
+|This code indicates that the file already exists.
+|===
+
+== See also
+
+* xref:command/securityUtility-encode.adoc[securityUtility encode]

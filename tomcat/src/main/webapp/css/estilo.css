@@ -1,0 +1,12 @@
+table
+{
+    font-family: sans-serif;
+    border-collapse: collapse;
+}
+
+td, th, input
+{
+    border: 4px solid #000000;
+    text-align: left;
+    padding: 8px;
+}

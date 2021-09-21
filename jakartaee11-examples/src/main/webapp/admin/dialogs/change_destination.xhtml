@@ -1,0 +1,31 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core">
+<f:metadata>
+    <f:viewParam name="trackingId" value="#{changeDestination.trackingId}"/>
+    <f:viewAction action="#{changeDestination.load}"/>
+</f:metadata>
+<h:head>
+    <title>Change Destination</title>
+    <h:outputStylesheet name="css/app.css"/>
+</h:head>
+<h:body>
+    <main class="standalone-main">
+        <h:form styleClass="panel">
+            <p class="page-kicker">Cargo update</p>
+            <h1>Change destination</h1>
+            <h:panelGrid columns="2" cellpadding="15">
+                <h:outputLabel value="Origin:"/>
+                <h:outputText value="#{changeDestination.cargo.origin.name}"/>
+                <h:outputLabel value="Current destination:"/>
+                <h:outputText value="#{changeDestination.cargo.routeSpecification.destination.name}"/>
+                <h:outputLabel value="New destination:"/>
+                <h:selectOneMenu value="#{changeDestination.destinationUnlocode}">
+                    <f:selectItems value="#{changeDestination.potentialDestinations}" var="loc"
+                                   itemLabel="#{loc.name}" itemValue="#{loc.unLoCode.code}"/>
+                </h:selectOneMenu>
+                <h:commandButton value="Cancel" action="/admin/dashboard?faces-redirect=true" immediate="true"/>
+                <h:commandButton value="Update" action="#{changeDestination.changeDestination()}"/>
+            </h:panelGrid>
+        </h:form>
+    </main>
+</h:body>
+</html>

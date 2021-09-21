@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:ui="jakarta.faces.facelets">
+<ui:composition template="/WEB-INF/templates/common/admin.xhtml">
+    <ui:define name="title">Cargo Dashboard</ui:define>
+    <ui:define name="content">
+        <div class="dashboard-page" id="container">
+            <div class="page-intro">
+                <p class="page-kicker">Cargo portfolio</p>
+                <h2>Operations overview</h2>
+                <p>Review routed, awaiting-route, and completed shipments from one workspace.</p>
+            </div>
+            <aside class="dashboard-action-card">
+                <div>
+                    <p class="page-kicker">Handling operations</p>
+                    <h2>Log a cargo event</h2>
+                    <p>Record handling activity using the guided event logger.</p>
+                </div>
+                <a class="dashboard-action-link"
+                   href="#{request.contextPath}/event-logger/index.xhtml">
+                    Open event logger <span aria-hidden="true">→</span>
+                </a>
+            </aside>
+            <div class="stat-row" aria-label="Cargo statistics">
+                <div class="stat-tile"><strong>#{listCargo.onboardCount}</strong><span>On board a vessel</span></div>
+                <div class="stat-tile"><strong>#{listCargo.inPortCount}</strong><span>In port</span></div>
+                <div class="stat-tile #{listCargo.misroutedCount gt 0 ? 'is-alert' : ''}"><strong>#{listCargo.misroutedCount}</strong><span>Misrouted</span></div>
+                <div class="stat-tile #{listCargo.overdueCount gt 0 ? 'is-alert' : ''}"><strong>#{listCargo.overdueCount lt 0 ? '…' : listCargo.overdueCount}</strong><span>Past deadline</span></div>
+            </div>
+            <h:form id="mainDash" styleClass="dashboard-stack">
+                <ui:include src="/admin/tables/list_routed.xhtml" class="clearCargoBkg"/>
+                <ui:include src="/admin/tables/list_not_routed.xhtml"/>
+                <ui:include src="/admin/tables/list_claimed.xhtml"/>
+            </h:form>
+        </div>
+    </ui:define>
+</ui:composition>
+</html>

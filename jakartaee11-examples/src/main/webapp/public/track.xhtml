@@ -1,0 +1,18 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets">
+<ui:composition template="/WEB-INF/templates/common/public.xhtml">
+    <ui:define name="title">Track Cargo</ui:define>
+    <ui:define name="content">
+        <div class="content-narrow">
+            <ui:include src="/WEB-INF/fragments/tracking.xhtml">
+                <ui:param name="showDetailsLink" value="#{false}"/>
+                <ui:param name="showMap" value="#{true}"/>
+            </ui:include>
+        </div>
+        <h:outputStylesheet name="leaflet/leaflet.css"/>
+        <h:outputScript name="leaflet/leaflet.js"/>
+        <h:outputScript name="js/cargo-map.js"/>
+    </ui:define>
+</ui:composition>
+</html>

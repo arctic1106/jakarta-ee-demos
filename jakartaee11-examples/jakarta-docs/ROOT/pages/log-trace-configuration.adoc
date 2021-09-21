@@ -1,0 +1,782 @@
+// Copyright (c) 2013, 2022 IBM Corporation and others.
+// Licensed under Creative Commons Attribution-NoDerivatives
+// 4.0 International (CC BY-ND 4.0)
+//   https://creativecommons.org/licenses/by-nd/4.0/
+//
+// Contributors:
+//     IBM Corporation
+//
+//
+//
+:page-layout: general-reference
+:page-type: general
+= Log and trace configuration
+
+Open Liberty has a unified logging component that handles messages that are written by applications and the runtime, and provides First Failure Data Capture (FFDC) capability. Logging data that is written by applications by using the `System.out`, `System.err`, or `java.util.logging.Logger` streams is combined into the server logs.
+
+A server has the following four primary log files:
+
+- `console.log` - This file is created by the `server start` command. It contains the redirected standard output and standard error streams from the underlying JVM process. This console output is formatted for human readability and it lacks some information that is useful for automated log analysis. The `console.log` file is reset when the server is restarted.
+
+- `messages.log` - This file contains all messages that are written or captured by the logging component. All messages that are written to this file contain additional information such as the message timestamp and the ID of the thread that wrote the message. This file is suitable for automated log analysis. This file does not contain messages that are written directly by the JVM process.
+
+- `trace.log` - This file is created only if you enable trace. It contains all the content of the `messages.log` file plus any enabled trace. This file does not contain messages that are written directly by the JVM process.
+
+- `verbosegc.XXX.log` - These files contain verbose garbage collection output from the JVM and are created by default when the Java implementation is either IBM Java or IBM Semeru Runtimes. Up to 10 rolling log files are created in your log directory, with 1024 GC cycles per file, where `XXX` represents the sequence number of the log file. Custom configurations take precedence over the default behavior. To disable the verbose garbage collection logs, add `VERBOSEGC=false` to the `server.env` file. For more information, see the https://eclipse.dev/openj9/docs/vgclog[Verbose garbage collection logs].
+
+You can use the `user.timezone` JVM property to set the time zone for your application environments. Set the `user.timezone` property in the `jvm.properties` file. The updated time zone information is displayed in the `messages.log` and `trace.log` files. The following example shows how to set the time zone.
+
+[subs=+quotes]
+----
+-Duser.timezone=_time_zone_code_
+----
+
+The following sections provide more information about configuring your Open Liberty logs:
+
+* <<#mptel,Logging with MicroProfile Telemetry>>
+* <<#configuaration,Logging configuration>>
+* <<#storage,Log file storage management>>
+* <<#log_formats,Log formats>>
+* <<#json,JSON logging>>
+  ** <<#names,Configurable JSON field names>>
+  ** <<#fields,Custom message and trace JSON fields>>
+  ** <<#http,Selectable HTTP access log JSON fields>>
+* <<#container,Container image logging configuration>>
+* <<#binary,Binary logging>>
+* <<#rollover,Time-based log rollover>>
+* <<#settings,Configuration settings by source>>
+* <<#log_details,Trace log detail levels>>
+* <<#log_throttling,Log throttling>>
+
+[#mptel]
+== Logging with MicroProfile Telemetry
+
+When you enable the MicroProfile Telemetry feature version 2.0 and later, you can manage your logs, metrics, and traces in a standardized way with the OpenTelemetry protocol. For more information, see xref:microprofile-telemetry.adoc[Collect logs, metrics, and traces with OpenTelemetry].
+
+[#configuaration]
+== Logging configuration
+The logging component can be controlled through the server configuration. The logging component can be fully configured in your `server.xml` file by the `logging` element. However, logging is initialized before the `server.xml` file is processed so configuring logging through the `server.xml` file can result in early log entries that use a different log configuration from later ones. To avoid this problem, you can provide much of the logging configuration in the `boostrap.properties` file and in some cases by using environment variables. Avoid specifying different values for the same configuration property in both the bootstrap.properties and the server.xml file. For more information about logging configuration settings, see the <<#settings,Configuration settings by source>> table.
+
+[#storage]
+== Log file storage management
+The `console.log` file is created by redirecting the process `stdout` and `stderr` streams to a file. As a result, Open Liberty is unable to offer the same level of management, like log rollover, as it offers for the `messages.log` file. If you are concerned about the size of the `console.log` file, you can set the console log to `OFF` and use the `messages.log` file instead. All messages that are written or captured by the logging component are written to the `messages.log` file. You can configure file rollover in the message log.
+
+However, when you set the console log level to `OFF`, messages from the underlying JVM are still written to the `console.log` file. The same principle applies to any messages that are written to the native standard out and standard error streams. The Open Liberty logging component does not capture or control the destination of messages that are written directly by the JVM process, such as `-verbose:gc` output. These messages are routed to the file system according to the active JVM settings and they do not appear in the `messages.log` file.
+
+
+To prevent the logging component from writing to the console log and configure the `messages.log` file to roll over three times at 100 Mb, use the following configuration:
+
+[source,properties,linenums,role="code_column"]
+----
+com.ibm.ws.logging.max.file.size=100
+com.ibm.ws.logging.max.files=3
+com.ibm.ws.logging.console.log.level=OFF
+com.ibm.ws.logging.copy.system.streams=false
+----
+
+[#log_formats]
+== Log formats
+
+Each of the three Open Liberty primary log files has a default log format and several alternative formats that you can specify in your logging configuration. The format that you choose for each log depends on the needs of your application and your infrastructure. For example, you might choose to output your message log in JSON format if it is consumed by a log analysis platform. Alternatively, you might choose the `TBASIC` format for all three logs if you need a consistent log format across all of your log files.
+
+- The default format for the `console.log` file is `DEV`.
+- The default format for the `messages.log` file is `SIMPLE`.
+- The default format for the `trace.log` file is `ENHANCED`.
+
+The following examples show sample output in each of the available log formats and list the logs for which each format is available: `DEV`, `SIMPLE`, `JSON`, `TBASIC`, `ENHANCED`, and `ADVANCED`.
+
+DEV (console log)::
+Messages that are in `DEV` format use the following pattern:
++
+[subs=+quotes]
+----
+<log level> <message_ID>: <message>
+----
++
+The following example shows a message in `DEV` format:
++
+[source,console]
+----
+[AUDIT] CWWKF0011I: The defaultServer server is ready to run a smarter planet. The defaultServer server started in 7.967 seconds.
+----
+
+SIMPLE (console and message logs)::
+Messages that are in `SIMPLE` format use the following pattern:
++
+[subs=+quotes]
+----
+<time stamp> <thread ID> <fully qualified name of logger> <log level attribute> <message ID>: <message>
+----
++
+The following example shows a message in `SIMPLE` format:
++
+[source,console]
+----
+[18/10/21 14:49:26:246 EDT] 0000003e com.ibm.ws.kernel.feature.internal.FeatureManager            A CWWKF0011I: The defaultServer server is ready to run a smarter planet. The defaultServer server started in 7.844 seconds
+----
+In this example, the `A` attribute that precedes the `CWWKF0011I` message ID code indicates that the message log level is `AUDIT`. For more information, see <<#log-level,Message log-level attributes>>.
+
+JSON (console and message logs)::
+Messages in JSON format include field names that identify the different components of the message. The following example shows a message in `JSON` format:
++
+[source,json]
+----
+{"type":"liberty_message","host":"HOST","ibm_userDir":"/wlp\/usr\/","ibm_serverName":"defaultServer","message":"CWWKF0011I: The defaultServer server is ready to run a smarter planet. The defaultServer server started in 7.967 seconds.","ibm_threadId":"0000003e","ibm_datetime":"2021-10-18T14:50:58.159-0400","ibm_messageId":"CWWKF0011I","module":"com.ibm.ws.kernel.feature.internal.FeatureManager","loglevel":"AUDIT","ibm_sequence":"1634583058159_0000000000009"}
+----
++
+For more information, see <<#json,JSON logging>>.
+
+TBASIC (console, messages, and trace logs)::
+Messages that are in `TBASIC` format use the following pattern:
++
+[subs=+quotes]
+----
+<time stamp> <thread ID> <class name of logger> <log level attribute> [<class name>] [<method name>] <message>
+----
+- The <message> will contain the message ID if available. This will be the case for logs emitted to the console and messages log, but the traces log include more specific logs that don't require message IDs.
+- The _class name of logger_ will be restricted to 13 characters long.
+- The fields in brackets (i.e., class name and method name) will only be available if present. It is common that these fields may not be present in a trace. A scenario where these fields will be populated is if an application provides the `class name` and `method name` parameters to the `Logger` when instrumenting logging statements.
+
+The following example shows a message in `TBASIC` format without the class name and method name fields filled. Notice how `FeatureManager` has been cut to `FeatureManage` (i.e., 13 characters):
+
+[source,console]
+----
+[2025-05-21, 17:35:56:269 EDT] 0000003d FeatureManage A   CWWKF0011I: The driver server is ready to run a smarter planet. The driver server started in 8.962 seconds.
+----
+
+The following is an example of a `TBASIC` formatted message with the class name and method name fields provided. Notice in this example how the _logger_ name is `webcontainer`, but the class the message originates from is `com.ibm.ws.webcontainer.osgi.DynamicVirtualHost`:
+
+[source,console]
+----
+[2025-05-21, 17:57:28:064 EDT] 00000041 webcontainer  I com.ibm.ws.webcontainer.osgi.DynamicVirtualHost addWebApplication SRVE0250I: Web Module ibm/api has been bound to default_host.
+----
+
+
+ENHANCED (trace log)::
+Messages that are in `ENHANCED` format use the following pattern:
++
+[subs=+quotes]
+----
+<time stamp> <thread ID> <object ID> <fully qualified class name of logger> <log level attribute> [<method name>] <message>
+----
+- The <message> will contain the message ID if available. The traces log contains more component specific logs that don't require message IDs.
+- The fields in brackets (i.e., method name) will only be available if present. It is common that this field may not be present in a trace. A scenario where this field will be populated is if an application provides the `method name` parameter to the `Logger` when instrumenting logging statements.
+- The `objectID` field represents the object where the log originates from. This field is always present even if it does not contain a value (i.e., 00000000).
+
+The following example shows a message in `ENHANCED` format:
+
+
+[source,console]
+----
+[2025-05-21, 16:04:36:874 EDT] 0000004c id=f430e04e cs.internal.monitor.computed.internal.ComputedMonitorMetrics > getMonitorMetricID Entry
+----
+
+The objectID here is `f430e04e`. This reflects the object ID (i.e., hash) of the `ComputedMonitorMetrics` class.
+
+The following example shows a message in `ENHANCED` format with an "empty" object ID:
+For example:
+
+[source,console]
+----
+[2025-05-21, 15:48:16:213 EDT] 00000001 id=00000000 com.ibm.ws.kernel.launch.internal.FrameworkManager           I CWWKE0002I: The kernel started after 1.954 seconds
+----
+
+
+ADVANCED (trace log)::
+
+Messages that are in `ADVANCED` format use the following pattern:
+
+```
+<time stamp> <thread ID> <log level attribute> UOW=<correlation ID> source=<fully qualified class name of logger> [class=<class name>] [method=<method name>] [id=<object ID>] org=<organization> prod=<product> component=<component> [thread=<thread name>] <message>
+```
+- The <message> will contain the message ID if available. The traces log contains more component specific logs that don't require message IDs.
+- The fields in brackets (i.e., class, method name, object ID and thread) will only be available if present. It is common that these field may not be present in a trace.
+- In comparison to `ENHANCED` format, the objectID will be omitted instead of having a `00000000` if the trace does not contain an object ID associated to it.
+- The fields for organization, product and component are always present even if there is no value assosicated to the field. This results in an empty field (e.g., "org=").
+
+The following example shows a message in `ADVANCED` format:
+
+[source,console]
+----
+[26/10/21 10:29:25:011 EDT] 00000073  > UOW= source=com.ibm.ws.event.internal.EventImpl method=setProperty id=5f05cd40 org= prod= component=
+          Entry
+          service.objectClass
+          java.util.concurrent.ExecutorService
+          com.ibm.wsspi.threading.WSExecutorService
+----
+
+In this trace, we see that the method field has a value and indicates the originating method as `setProperty` and the object ID is `5f05cd40`. The organization, product and component are empty, but as they are always present we see `org= prod= component=`.
+
+
+[#log-level]
+=== Message log-level attributes
+
+Messages that are in `DEV` format print the full log-level name before the message ID code. Messages that are in `JSON` or `ENHANCED` format include a `loglevel` property that identifies the message log level.
+
+Messages that are in `SIMPLE` or `TBASIC` format include one of the following message log-level attributes directly before the message ID code:
+
+.Log-level attributes
+[%header,cols="3,6,9"]
+|===
+| Attribute|Log level|Description
+
+|`A`
+|AUDIT
+|Audit messages are written to the system output stream.
+
+|`E`
+|ERROR
+|Error messages are written to the system error stream.
+
+|`I`
+|INFO
+|Info messages are written to the system output stream.
+
+|`W`
+|WARNING
+|Warning messages are written to the system output stream.
+
+|`O`
+|N/A
+|This attribute does not specify a log level but indicates that the message is written to the system output stream.
+
+|`R`
+|N/A
+|This attribute does not specify a log level but indicates that the message is written to the system error stream.
+
+|===
+
+
+For more information about log levels and output streams, see the descriptions for the `consoleLogLevel` and `copySystemStreams` attributes for the config:logging[] element.
+
+
+[#trace-log-level]
+=== Trace log-level attributes
+
+In addition to message log-level attributes, traces have additional log levels that are listed below. Some traces may have _message log-level attributes_ defined above and some may contain the below _trace log-level attributes_.
+
+.Trace-level attributes
+[%header,cols="3,6,9"]
+|===
+| Attribute|Log level|Description
+
+|`1`
+|FINE
+|Traces that are at the `FINE granularity.
+
+|`2`
+|FINER
+|Traces that are at the `FINER granularity.
+
+|`3`
+|FINEST
+|Traces that are at the `FINEST` granularity.
+
+|`>`
+|ENTRY
+|Traces that indicate an entry into a method. This on the same granularity as `F
+
+|`<`
+|EXIT
+|Traces that indicate an exit of a method. This on the same granularity as `FINEST`.
+
+|===
+
+
+[#tbasic]
+=== TBASIC log format
+
+The `TBASIC` logging format provides a consistent log format across your Open Liberty console, message, and trace log files.
+The `BASIC` logging format exists for the trace log.
+However, the output differs between the trace log and that of the console and message logs.
+The `TBASIC` format provides a consistent format option for the trace, console, and message logs that matches the `BASIC` option for the trace log.
+The `TBASIC` format acts as an alias for the `BASIC` option.
+
+You can specify the `TBASIC` format  in the `bootstrap.properties` file, as shown in the following example:
+
+----
+com.ibm.ws.logging.message.format=tbasic
+com.ibm.ws.logging.console.format=tbasic
+com.ibm.ws.logging.trace.format=tbasic
+----
+
+You can also specify the `TBASIC` log format for the messages and console logs as an environment variable in your `server.env` file, as shown in the following example:
+
+----
+WLP_LOGGING_MESSAGE_FORMAT=TBASIC
+WLP_LOGGING_CONSOLE_FORMAT=TBASIC
+----
+
+[#json]
+== JSON logging
+You can simplify log parsing by producing your logs in JSON format. JSON is a self-describing format that many log analysis tools can consume without requiring format-specific parsing instructions. You can configure Open Liberty logs to produce logs in JSON format either by editing the `bootstrap.properties` file or by specifying an environment variable. The following two examples show the configuration for each of these options:
+
+* Configure JSON logging in the `bootstrap.properties` file:
++
+[source,properties,linenums,role="code_column"]
+----
+com.ibm.ws.logging.message.format=json
+com.ibm.ws.logging.message.source=message,trace,accessLog,ffdc,audit
+----
++
+* Configure JSON logging with environment variables in the `server.env` file:
++
+[source,properties,linenums,role="code_column"]
+----
+WLP_LOGGING_MESSAGE_FORMAT=json
+WLP_LOGGING_MESSAGE_SOURCE=message,trace,accessLog,ffdc,audit
+----
+
+[#names]
+=== Configurable JSON field names
+When logs are in JSON format, you can use the `jsonFieldMappings` attribute to replace default field names with new field names. Replacing the default field names might be necessary if other servers in the same logging configuration use different field names than the Open Liberty default names. For example, an Open Liberty message is referred to by the `message` field name, but the message in another container might be in a field called `log`. In this case, two different visualizations of the messages show in the logs on a dashboard. If you modify the Open Liberty output field name so that it matches the other log, you can view them in the same visualization. The following examples show sample configurations for renaming a JSON field.
+
+* To configure a new field name, you can include the following environmental variable in the `server.env` file:
++
+[source,properties,linenums,role="code_column"]
+----
+WLP_LOGGING_JSON_FIELD_MAPPINGS=loglevel:level
+----
++
+In this example, the `loglevel` field name is replaced by the `level` field name.
+
+
+* To configure a field name for a specific source, you can include the following environmental variable in the `server.env` file:
++
+[source,properties,linenums,role="code_column"]
+----
+WLP_LOGGING_JSON_FIELD_MAPPINGS=message:message:log
+----
++
+In this example, the `message` field name is replaced by the `log` field name in the message log.
+
+To omit a field from the logs, specify the field name without a replacement, as shown in the following example:
+
+----
+WLP_LOGGING_JSON_FIELD_MAPPINGS=defaultFieldName:
+----
+
+To rename or omit multiple fields, specify a comma-separated list of field name mappings.
+
+For a full list of the default JSON field names, see xref:json-log-events-list.adoc[the JSON log events reference list].
+
+For more information, see link:/blog/2019/10/11/configure-logs-JSON-format-190010.html#jlog[Configurable JSON log field names].
+
+[#fields]
+=== Custom message and trace JSON fields
+
+You can add custom fields to your JSON-formatted message and trace output to gather information about a particular issue or incident. For example, if you want to check the requests from a specific user, you can add a custom field to filter application logs by that user’s ID. You can add another field for the session ID so that you can analyze and filter application logs for a specific session.
+
+The Open Liberty `LogRecordContext` API can add custom fields to your log and trace records. This API adds a field by specifying a value for an extension. To use the `LogRecordContext` API, first import the `com.ibm.websphere.logging.hpel.LogRecordContext` class. The following examples show how to add different kinds of custom fields to your JSON logs.
+
+To add a string-valued field to your application logs, you can include the following line in your application:
+
+[source,java]
+----
+LogRecordContext.addExtension("userName","bob");
+----
+
+The newly specified field is added to log and trace entries that are created on the same thread that executes the `addExtension` method. In this example, a custom field that is called `userName` is added for the `bob` user ID.
+
+To add fields with boolean, float, int, or long values, the extension name must include the suffixes `_bool`, `_float`, `_int`, or `_long`, as shown in the following examples:
+
+[source,java]
+----
+LogRecordContext.addExtension("extensionName_bool","true");
+LogRecordContext.addExtension("extensionName_int","112233");
+LogRecordContext.addExtension("extensionName_float","1.2");
+LogRecordContext.addExtension("extensionName_long","132");
+----
+
+When you specify these suffixes to add non-string values, the resulting JSON field values are not enclosed in quotes in the logs. Only string-valued JSON field values are enclosed in quotes in the logs.
+
+To remove custom fields from the logs, use the following method:
+
+[source,java]
+----
+LogRecordContext.removeExtension(extensionName);
+----
+
+After you remove an extension, JSON output for subsequent logs and trace that are made on the same thread do not include that field.
+
+[#http]
+=== Selectable HTTP access log JSON fields
+
+When logs are in JSON format and the `accessLog` source is specified, you can replace the default HTTP access log JSON fields with a different set of fields. You can use the `jsonAccessLogFields` attribute to specify whether your access logs use the default fields or a set of fields that is specified by the `logFormat` attribute. You specify the replacement fields in the `logFormat` attribute of the `accessLogging` element within the `httpEndpoint` element.
+
+[NOTE]
+====
+If the Logstash Collector or MicroProfile Telemetry features are enabled, the `logFormat` attribute that is configured for those features takes precedence over the `jsonAccessLogFields` configuration. The resulting JSON access logs follow the format that is configured by those features rather than the fields specified in `jsonAccessLogFields`.
+====
+
+With this configuration, you can receive information that is otherwise not available in JSON logs, such as the remote user ID, request headers, and more. These logs can be used by log analysis tools, such as the Elastic stack, to monitor your server. For more information about HTTP access log format options, see xref:access-logging.adoc[HTTP access logging].
+
+The following example shows a configuration in the `server.xml` file to replace the default HTTP access log fields with fields that are specified by the `logFormat` attribute. xref:access-logging.adoc[HTTP access logging] must be enabled to receive JSON access logs.
+
+[source,xml]
+----
+<httpEndpoint httpPort="9080" httpsPort="9443" id="defaultHttpEndpoint">
+    <accessLogging logFormat='%R{W} %u %{my_cookie}C %s'/>
+</httpEndpoint>
+<logging jsonAccessLogFields="logFormat"/>
+----
+
+[#container]
+== Container image logging configuration
+
+In containerized environments, you can disable the message log and format the console output as JSON by using environment variables, as shown in the following example:
+
+[source,properties,linenums,role="code_column"]
+----
+WLP_LOGGING_MESSAGE_FORMAT=json
+WLP_LOGGING_MESSAGE_SOURCE=
+WLP_LOGGING_CONSOLE_FORMAT=json
+WLP_LOGGING_CONSOLE_LOGLEVEL=info
+WLP_LOGGING_CONSOLE_SOURCE=message,trace,accessLog,ffdc,audit
+----
+
+You can specify this configuration when you run the `docker run` command by using the `-e` flag to set the environment variables:
+
+[source,sh]
+----
+docker run -e "WLP_LOGGING_CONSOLE_SOURCE=message,trace,accessLog,ffdc"
+           -e "WLP_LOGGING_CONSOLE_FORMAT=json"
+           -e "WLP_LOGGING_CONSOLE_LOGLEVEL=info"
+           -e "WLP_LOGGING_MESSAGE_FORMAT=json"
+           -e "WLP_LOGGING_MESSAGE_SOURCE=" open-liberty
+----
+
+If you use https://docs.podman.io/en/latest[Podman] to manage your containers, run the following command:
+
+[source,sh]
+----
+podman run -e "WLP_LOGGING_CONSOLE_SOURCE=message,trace,accessLog,ffdc"
+           -e "WLP_LOGGING_CONSOLE_FORMAT=json"
+           -e "WLP_LOGGING_CONSOLE_LOGLEVEL=info"
+           -e "WLP_LOGGING_MESSAGE_FORMAT=json"
+           -e "WLP_LOGGING_MESSAGE_SOURCE=" open-liberty
+----
+
+[#binary]
+== Binary logging
+
+Liberty has a high-performance binary log format option that reduces the resources that are needed to write trace files. For best performance, when you configure binary logging, set the console log level to `OFF` and <<#storage,use the message log instead>>. You can configure binary logging in the `bootstrap.properties` file, as shown in the following example:
+
+[source,properties,linenums,role="code_column"]
+----
+websphere.log.provider=binaryLogging-1.0
+com.ibm.ws.logging.console.log.level=OFF
+com.ibm.ws.logging.copy.system.streams=false
+----
+However, when you set the console log level to `OFF`, messages from the underlying JVM other other messages that are written to the native standard out and standard error streams are still written to the `console.log` file.
+
+
+You can use the `binaryLog` command to convert the binary log to a text file, as shown in the following example for a server that is called `defaultServer`:
+
+[role='command']
+----
+binaryLog view defaultServer
+----
+
+[#rollover]
+== Time-based log rollover
+
+You can enable time-based periodic rollover of Liberty messages and trace logs by specifying a log rollover start time and a log rollover interval duration. The specified rollover start time is the time of day when logs first roll over. The rollover interval duration is the time interval in between consecutive log rollovers.
+
+For example, a server with a rollover start time of midnight and a rollover interval of 1 day rolls over the messages and trace logs once every day, at midnight.
+
+You can configure rollover for Open Liberty messages and trace logs by either editing the `bootstrap.properties` file, specifying environment variables, or by using server configuration attributes. The following examples show the configuration for each of these options, with a log rollover start time of midnight and a log rollover interval of 1 day.
+
+* The following example configures time-based log rollover in the `bootstrap.properties` file.
++
+[source,properties,linenums,role="code_column"]
+----
+com.ibm.ws.logging.rollover.start.time=00:00
+com.ibm.ws.logging.rollover.interval=1m
+----
++
+* The following example configures time-based log rollover with environment variables in the `server.env` file.
++
+[source,properties,linenums,role="code_column"]
+----
+WLP_LOGGING_ROLLOVER_START_TIME=00:00
+WLP_LOGGING_ROLLOVER_INTERVAL=1m
+----
++
+* The following example configures time-based log rollover with server configuration attributes in the `server.xml` file.
++
+[source,properties,linenums,role="code_column"]
+----
+<logging rolloverStartTime="00:00" rolloverInterval="1d"/>
+----
+
+
+[#settings]
+== Configuration settings by source
+
+The following table shows the equivalent `server.xml` file, `bootstrap.properties` file, and environment variable configurations along with brief descriptions. Settings that apply to the console log appear first, followed by settings that apply to the message log, and then the trace log. Settings that apply either globally or to more than one log type appear last in the table. For more information, see the xref:reference:config/logging.adoc[logging element].
+
+// keep the rows in this table sorted according to the table description: console, message, trace, multiple/global. Rows within each category should be sorted alphabetically, with the exception of any settings that relate to JSON, which are sorted together in the final group under "j", regardless of the attribute name
+
+
+.Logging configuration settings
+[%header,cols="6,9,9,9"]
+|===
+| Server XML Attribute|bootstrap property|Env var|Description
+
+|consoleFormat
+|com.ibm.ws.logging.console.format
+|WLP_LOGGING_CONSOLE_FORMAT
+|This setting specifies the required format for the console. Valid values are `DEV`, `SIMPLE`, `JSON`, `TBASIC` format. By default, `consoleFormat` is set to `DEV`. For more information, see <<#log_formats, Log formats>>.
+
+|consoleLogLevel
+|com.ibm.ws.logging.console.log.level
+|WLP_LOGGING_CONSOLE_LOGLEVEL
+|This setting controls the granularity of messages that go to the console. The valid values are INFO, AUDIT, WARNING, ERROR, and OFF. The default is AUDIT. If using with the Eclipse developer tools this must be set to the default.
+
+|consoleSource
+|com.ibm.ws.logging.console.source
+|WLP_LOGGING_CONSOLE_SOURCE
+|This setting specifies a comma-separated list of sources that route to the console. It applies only when the console format is set to `json`. The valid values are `message`, `trace`, `accessLog`, `ffdc`, and `audit`. By default, `consoleSource` is set to `message`. To use the `audit` source, enable the Liberty feature:audit[display=Audit] feature. To use the `accessLog` source you need to configure config:httpAccessLogging[display=HTTP access logging].
+
+|copySystemStreams
+|com.ibm.ws.logging.copy.system.streams
+|
+|If this setting is set to `true`, messages that are written to the System.out and System.err streams are copied to process `stdout` and `stderr` streams and so appear in the `console.log` file. If this setting is set to `false`, those messages are written to configured logs such as the `messages.log` file or `trace.log` file, but they are not copied to `stdout` and `stderr` and do not appear in `console.log`. The default value is true.
+
+|messageFileName
+|com.ibm.ws.logging.message.file.name
+|
+|This setting specifies the name of the message log file. The message log file has a default name of `messages.log`. This file always exists, and contains INFO and other (AUDIT, WARNING, ERROR, FAILURE) messages in addition to the `System.out` and `System.err` streams . This log also contains time stamps and the issuing thread ID. If the log file is rolled over, the names of earlier log files have the format `messages_timestamp.log`
+
+|messageFormat
+|com.ibm.ws.logging.message.format
+|WLP_LOGGING_MESSAGE_FORMAT
+|This setting specifies the required format for the `messages.log` file. Valid values are `SIMPLE`, `JSON`, or `TBASIC` format. By default, `messageFormat` is set to `SIMPLE`. For more information, see <<#log_formats, Log formats>>.
+
+|messageSource
+|com.ibm.ws.logging.message.source
+|WLP_LOGGING_MESSAGE_SOURCE
+|This setting specifies a list of comma-separated sources that route to the `messages.log` file. This setting applies only when the message format is set to `json``. The valid values are `message`, `trace`, `accessLog`, `ffdc`, and `audit`. By default, `messageSource` is set to `message`. To use the `audit` source, enable the Liberty feature:audit-1.0[] feature. To use the `accessLog` source you need to have configured config:httpAccessLogging[].
+
+|suppressSensitiveTrace
+|
+|
+|This attribute, when set to `true`, prevents potentially sensitive information from being exposed in log and trace files. The server trace can expose sensitive data when it traces untyped data, such as bytes received over a network connection. The default value is `false`.
+
+|throttleMaxMessagesPerWindow
+|com.ibm.ws.logging.throttle.max.messages.per.window
+|WLP_LOGGING_THROTTLE_MAX_MESSAGES_PER_WINDOW
+|This setting specifies the maximum number of log messages permitted over a 5 minute duration. If this limit is exceeded within the current window, any additional messages will be suppressed until the count falls below the threshold. Valid values are any positive integer. The default is `1000`. Set the attribute to `0` to disable throttling.
+
+|throttleType
+|com.ibm.ws.logging.throttle.type
+|WLP_LOGGING_THROTTLE_TYPE
+|This setting specifies whether to track log entries by matching either the `messageID` or the full message content. The valid values are `message` and `messageID`, the default value is `messageID`.
+
+|traceFileName
+|com.ibm.ws.logging.trace.file.name
+|
+|This setting specifies the name of the trace log file. The `trace.log` file is created only if additional or detailed trace is enabled. `stdout` is recognized as a special value, and causes trace to be directed to the original standard out stream.
+
+|traceFormat
+|com.ibm.ws.logging.trace.format
+|
+|This setting controls the format of the trace log. The default format for Liberty is `ENHANCED`. You can also use `BASIC`, `TBASIC`, and `ADVANCED` formats. For more information, see <<#log_formats, Log formats>>.
+
+|traceSpecification
+|com.ibm.ws.logging.trace.specification
+|
+|This setting is used to selectively enable trace. The log detail level specification is in the following format:
+
+`component = level`
+
+The component specifies what log sources the level is set for. A component can be a logger name, trace group, or class name. The level specifies what level of trace to output for that component by using one of the following levels:
+
+`off`, `fatal`, `severe`, `warning`, `audit`, `info`, `config`, `detail`, `fine`, `finer`, `finest`, `all`.
+Setting a trace component to `off`, `fatal`, `severe`, `warning`, `audit`, or `info` level has the same effect as setting it to the `info` level as `info` and higher levels cannot be disabled.
+
+You can provide multiple log detail level specifications that are separated by colons.
+
+An asterisk pass:[*] acts as a wildcard to match multiple components based on a prefix. For example:
+
+- `pass:[*]` Specifies all traceable code that is running in the application server, including the product system code and customer code.
+
+- `com.ibm.ws.pass:[*]` Specifies all classes with the package name beginning with com.ibm.ws.
+
+- `com.ibm.ws.classloading.AppClassLoader` Specifies the AppClassLoader class only.
+
+The `trace.log` file is created and logs are written to it only if one or more trace components are set to `config` level or lower.
+For more information on logging levels, see <<#logging_levels,Valid log detail levels for the trace log>>.
+
+|
+|com.ibm.ws.logging.newLogsOnStart
+|
+|If this setting is set to true when Open Liberty starts, any existing `messages.log` or `trace.log` files are rolled over and logging writes to a new `messages.log` or `trace.log` file. If this setting is set to false, `messages.log` or `trace.log` files only refresh when they hit the size that is specified by the `maxFileSize` attribute. The default value is `true`. This setting cannot be provided using the `logging` element in the `server.xml` file because it is only processed during server bootstrap.
+
+|hideMessage
+|com.ibm.ws.logging.hideMessage
+|
+|You can use this setting to configure the messages keys that you want to hide from the `console.log` and `messages.log` files. When the messages are hidden, they are redirected to the `trace.log` file.
+
+|isoDateFormat
+|com.ibm.ws.logging.isoDateFormat
+|
+|This setting specifies whether to use ISO-8601 formatted dates in log files. The default value is false.
+
+If this setting is set to true, the ISO-8601 format is used in the `messages.log` file, the `trace.log` file, and the FFDC logs. The format is `yyyy-MM-dd'T'HH:mm:ss.SSSZ`.
+
+If you specify a value of `false`, the date and time are formatted according to the default locale set in the system. If the default locale is not found, the format is `dd/MMM/yyyy HH:mm:ss:SSS z`.
+
+|maxFfdcAge
+|com.ibm.ws.logging.max.ffdc.age
+|WLP_LOGGING_MAX_FFDC_AGE
+|Use this setting to enable FFDC file purging based on age. This setting specifies the maximum file age before an FFDC file is deleted. Purges occur everyday at midnight. Specify a positive integer followed by a unit of time, which can be days (`d`), hours (`h`), or minutes (`m`). For example, specify 2 days as `2d`. You can include multiple values in a single entry. For example, `2d6h` is equivalent to 2 days and 6 hours.
+
+|appsWriteJson
+|com.ibm.ws.logging.apps.write.json
+|WLP_LOGGING_APPS_WRITE_JSON
+|When the message log or console is in JSON format, this setting allows applications to write JSON-formatted messages to those destinations, without modification.
+
+|jsonAccessLogFields
+|com.ibm.ws.json.access.log.fields
+|WLP_LOGGING_JSON_ACCESS_LOG_FIELDS
+|When logs are in JSON format, you can use this setting to replace the default HTTP access log JSON fields with fields that are specified by the `logFormat` attribute of the `accesLogging` element.
+
+|jsonFieldMappings
+|com.ibm.ws.logging.json.field.mappings
+|WLP_LOGGING_JSON_FIELD_MAPPINGS
+|When logs are in JSON format, use this setting to replace default field names with new field names or to omit fields from the logs. For more information, see <<#names,Configurable JSON field names>>
+
+|logDirectory
+|com.ibm.ws.logging.log.directory
+|LOG_DIR
+|You can use this setting to set a directory for all log files, excluding the `console.log` file, but including FFDC. The default is `WLP_OUTPUT_DIR/serverName/logs`. It is not recommended to set the `logDirectory` in the `server.xml` file since it can result in some log data being written to the default location prior to when the `server.xml` file is read.
+
+|maxFiles
+|com.ibm.ws.logging.max.files
+|
+|This setting specifies how many of each of the logs files are kept. This setting also applies to the number of exception summary logs for FFDC. So if this number is `10`, you might have 10 message logs, 10 trace logs, and 10 exception summaries in the `ffdc/` directory. By default, the value is `2`. The console log does not roll so this setting does not apply to the `console.log` file.
+
+|maxFileSize
+|com.ibm.ws.logging.max.file.size
+|
+|This setting specifies the  maximum size (in MB) that a log file can reach before it is rolled. Setting the value to `0` disables log rolling. The default value is `20`. The `console.log` does not roll so this setting does not apply.
+
+|stackTraceSingleEntry
+|com.ibm.ws.logging.stackTraceSingleEntry
+|WLP_LOGGING_STACK_TRACE_SINGLE_ENTRY
+| When this attribute is set to `true`, stack traces that are emitted to standard-out and standard-error are merged into a single log event. By default, this value is set to `false` and each individual line of the stack trace is emitted as an individual log event.
+
+|rolloverStartTime
+|com.ibm.ws.logging.rollover.start.time
+|WLP_LOGGING_ROLLOVER_START_TIME
+| Use this setting alone or with the `rolloverInterval` attribute to enable time-based log rollover for `messages.log` and `trace.log` files. This setting specifies the scheduled time of day for logs to first roll over. The `rolloverInterval` setting duration begins at the time that is specified by the  `rolloverStartTime` attribute. Valid values follow a 24-hour ISO-8601 date-time format of HH:MM, where 00:00 represents midnight. Padding zeros are required. If the `rolloverInterval` attribute is specified, the default value of the `rolloverStartTime` attribute is 00:00, midnight. The `console.log` does not roll so this setting does not apply.
+
+|rolloverInterval
+|com.ibm.ws.logging.rollover.interval
+|WLP_LOGGING_ROLLOVER_INTERVAL
+| Use this setting alone or with the `rolloverStartTime` attribute to enable time-based log rollover for `messages.log` and `trace.log` files. This setting specifies the time interval in between log rollovers, in minutes if a unit of time is not specified. Specify a positive integer followed by a unit of time, which can be days (d), hours (h), or minutes (m). For example, specify 5 hours as 5h. You can include multiple values in a single entry. For example, 1d5h is equivalent to 1 day and 5 hours. If the `rolloverStartTime` attribute is specified, the default value of the `rolloverInterval` attribute is 1 day. The `console.log` does not roll so this setting does not apply.
+
+|===
+
+[#log_details]
+== Trace log detail levels
+
+You can specify the `traceSpecification` attribute for the `logging` element in your `server.xml` file to selectively enable trace and set the trace log detail level for specific components in your server configuration.
+The following example specifies a trace specification for two groups of components.
+
+[source,xml]
+----
+<logging traceSpecification="com.myco.mypackage1.*=fine:com.myco.mypackage2.*=finest"/>
+----
+
+In this example, the two detail level specifications are separated by a colon (`:`).
+
+The `com.myco.mypackage1.pass:[*]=fine` value applies to all classes with the package name that begins with `com.myco.mypackage1`.
+
+The `com.myco.mypackage2.pass:[*]=finest` value applies to all classes with the package name that begins with `com.myco.mypackage2`.
+
+The following table lists the valid log detail levels that you can specify in the `traceSpecification` attribute.
+You can specify an empty value for any component to disable all trace for that component.
+Any component that is not specified is initialized to a default state of `pass:[*]=info`.
+
+Setting a trace component to `off`, `fatal`, `severe`, `warning`, `audit`, or `info` level has the same effect as setting it to the `info` level as `info` and higher levels cannot be disabled.
+The `trace.log` file is created and logs are written to it only if one or more trace components are set to `config` level or lower.
+[#logging_levels]
+.Valid log detail levels for the trace log
+[%header,cols="6,9"]
+|===
+| Logging level|Content or Significance
+
+|off
+|Logging is turned off.
+
+|fatal
+|Task cannot continue and component, application, and server cannot function.
+
+|severe
+|Task cannot continue but component, application, and server can still function. This level can also indicate an impending unrecoverable error.
+
+|warning
+|Potential error or impending error. This level can also indicate a progressive failure. For example, the potential leaking of resources.
+
+|audit
+|Significant event that affects server state or resources
+
+|info
+|General information that outlines overall task progress
+
+|config
+|Configuration change or status
+
+|detail
+|General information that details subtask progress
+
+|fine
+|General trace
+
+|finer
+|Detailed trace that includes method entry, exit, and return values
+
+|finest
+|A more detailed trace that includes all the detail that is needed to debug problems
+
+|all
+|All events are logged. If you create custom levels, `all` includes those levels, and can provide a more detailed trace than finest.
+|===
+
+For information about mapping Open Liberty log levels to OpenTelemetry severity numbers, see xref:mptel-log-events-list.adoc#sevlev[OpenTelemetry severity number mapping with Open Liberty log levels].
+
+[#log_throttling]
+=== Log throttling
+
+Liberty can limit the number of times repeated log entries can be logged over a five minute period. Repeated log entries are identified by either their messageID's or the entire message content. This feature is enabled by default with a limit of 1000 messages over a 5 minute period. The maximum number of messages can be configured, but the duration cannot.
+
+Each log event's occurrence is tracked. When the threshold is met, logs are suppressed and a warning is logged. The occurrence continues to be tracked even while logs are suppressed, and log events are not logged until the occurrence drops below the configured threshold. There are a limited number of keys that are tracked, so regular garbage collection occurs to clean low occurring logs.
+
+==== Configuration
+
+You can configure log throttling based on the full message or messageID by using the `throttleType` logging attribute. The number of messages before throttling occurs can be configured using the `throttleMaxMessagesPerWindow` attribute. Log throttling is disabled by setting `throttleMaxMessagesPerWindow` to 0.
+
+Currently, these attributes can be configured as follows:
+
+server.xml
+[source,xml]
+----
+<logging throttleMaxMessagesPerWindow="5000" throttleType="messageID" />
+----
+
+bootstrap.properties
+[source,properties,linenums,role="code_column"]
+----
+com.ibm.ws.logging.throttle.max.messages.per.window=5000
+com.ibm.ws.logging.throttle.type=messageID
+----
+
+server.env
+[source,properties,linenums,role="code_column"]
+----
+WLP_LOGGING_THROTTLE_MAX_MESSAGES_PER_WINDOW=5000
+WLP_LOGGING_THROTTLE_TYPE=messageID
+----

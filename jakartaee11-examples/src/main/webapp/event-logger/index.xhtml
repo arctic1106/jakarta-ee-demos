@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:pt="jakarta.faces.passthrough">
+<h:head>
+    <title>Event Logger</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <h:outputStylesheet name="css/app.css"/>
+</h:head>
+<h:body>
+    <main class="standalone-main">
+        <div>
+            <a class="standalone-brand" href="#{request.contextPath}/">
+                <h:graphicImage value="#{resource['images/CTlogobadge128.png']}" alt="" />
+                Cargo Tracker
+            </a>
+            <div class="page-intro">
+                <p class="page-kicker">Operations workflow</p>
+                <h1>Cargo Event Logger</h1>
+                <p>Record a handling event through a guided six-step workflow.</p>
+            </div>
+            <h:form id="eventForm">
+                <h:messages id="globalMessages" globalOnly="true" style="color:red;"/>
+
+                <!-- Step 1: Tracking ID -->
+                <h:panelGroup id="trackingIdTab" rendered="#{eventLogger.currentStep == 'trackingIdTab'}">
+                    <div class="panel">
+                        <h3>Step 1: Tracking ID</h3>
+                        <h:messages for="trackingId" style="color:red;"/>
+                        <h:selectOneMenu id="trackingId" value="#{eventLogger.trackingId}"
+                                         required="true" requiredMessage="Select a tracking ID to continue.">
+                            <f:selectItem itemLabel="Select a tracking ID" itemValue="" noSelectionOption="true"/>
+                            <f:selectItems value="#{eventLogger.trackingIds}"/>
+                        </h:selectOneMenu>
+                        <br/><br/>
+                        <h:commandButton value="Next &#9658;" action="#{eventLogger.nextStep('locationTab')}"/>
+                    </div>
+                </h:panelGroup>
+
+                <!-- Step 2: Location -->
+                <h:panelGroup id="locationTab" rendered="#{eventLogger.currentStep == 'locationTab'}">
+                    <div class="panel">
+                        <h3>Step 2: Location</h3>
+                        <h:messages for="locationId" style="color:red;"/>
+                        <h:selectOneMenu id="locationId" value="#{eventLogger.location}"
+                                         required="true" requiredMessage="Select a location to continue.">
+                            <f:selectItem itemLabel="Select a location" itemValue="" noSelectionOption="true"/>
+                            <f:selectItems value="#{eventLogger.locations}"/>
+                        </h:selectOneMenu>
+                        <br/><br/>
+                        <h:commandButton value="&#9664; Back" action="#{eventLogger.nextStep('trackingIdTab')}" immediate="true"/>
+                        &#160;
+                        <h:commandButton value="Next &#9658;" action="#{eventLogger.nextStep('eventTypeTab')}"/>
+                    </div>
+                </h:panelGroup>
+
+                <!-- Step 3: Event Type -->
+                <h:panelGroup id="eventTypeTab" rendered="#{eventLogger.currentStep == 'eventTypeTab'}">
+                    <div class="panel">
+                        <h3>Step 3: Event Type</h3>
+                        <h:messages for="eventType" style="color:red;"/>
+                        <h:selectOneMenu id="eventType" value="#{eventLogger.eventType}"
+                                         required="true" requiredMessage="Select an event type to continue.">
+                            <f:selectItem itemLabel="Select an event type" itemValue="" noSelectionOption="true"/>
+                            <f:selectItems value="#{eventLogger.eventTypes}"/>
+                        </h:selectOneMenu>
+                        <br/><br/>
+                        <h:commandButton value="&#9664; Back" action="#{eventLogger.nextStep('locationTab')}" immediate="true"/>
+                        &#160;
+                        <h:commandButton value="Next &#9658;" action="#{eventLogger.nextStep('voyageTab')}"/>
+                    </div>
+                </h:panelGroup>
+
+                <!-- Step 4: Voyage -->
+                <h:panelGroup id="voyageTab" rendered="#{eventLogger.currentStep == 'voyageTab'}">
+                    <div class="panel">
+                        <h3>Step 4: Voyage (optional for LOAD/UNLOAD)</h3>
+                        <h:messages for="voyage" style="color:red;"/>
+                        <h:selectOneMenu id="voyage" value="#{eventLogger.voyageNumber}">
+                            <f:selectItem itemLabel="Select a voyage when required" itemValue="" noSelectionOption="true"/>
+                            <f:selectItems value="#{eventLogger.voyages}"/>
+                        </h:selectOneMenu>
+                        <br/><br/>
+                        <h:commandButton value="&#9664; Back" action="#{eventLogger.nextStep('eventTypeTab')}" immediate="true"/>
+                        &#160;
+                        <h:commandButton value="Next &#9658;" action="#{eventLogger.nextStep('dateTab')}"/>
+                    </div>
+                </h:panelGroup>
+
+                <!-- Step 5: Completion Date -->
+                <h:panelGroup id="dateTab" rendered="#{eventLogger.currentStep == 'dateTab'}">
+                    <div class="panel">
+                        <h3>Step 5: Completion Date/Time</h3>
+                        <h:messages for="completionDate" style="color:red;"/>
+                        <h:inputText id="completionDate" value="#{eventLogger.completionTime}"
+                                     required="true" requiredMessage="Enter the completion date and time."
+                                     pt:type="datetime-local" pt:step="60">
+                            <f:convertDateTime pattern="yyyy-MM-dd'T'HH:mm" type="localDateTime"/>
+                        </h:inputText>
+                        <br/><small>Use your local date and time in 24-hour format.</small>
+                        <br/><br/>
+                        <h:commandButton value="&#9664; Back" action="#{eventLogger.nextStep('voyageTab')}" immediate="true"/>
+                        &#160;
+                        <h:commandButton value="Next &#9658;" action="#{eventLogger.nextStep('confirm')}"/>
+                    </div>
+                </h:panelGroup>
+
+                <!-- Step 6: Confirmation -->
+                <h:panelGroup id="confirm" rendered="#{eventLogger.currentStep == 'confirm'}">
+                    <div class="panel">
+                        <h3>Step 6: Confirmation</h3>
+                        <table style="border-collapse: collapse; width: 100%;">
+                            <tr><td style="font-weight:bold; padding: 5px;">Tracking ID:</td><td style="padding: 5px;"><h:outputText value="#{eventLogger.trackingId}"/></td></tr>
+                            <tr><td style="font-weight:bold; padding: 5px;">Location:</td><td style="padding: 5px;"><h:outputText value="#{eventLogger.location}"/></td></tr>
+                            <tr><td style="font-weight:bold; padding: 5px;">Event Type:</td><td style="padding: 5px;"><h:outputText value="#{eventLogger.eventType}"/></td></tr>
+                            <tr><td style="font-weight:bold; padding: 5px;">Voyage Number:</td><td style="padding: 5px;"><h:outputText value="#{eventLogger.voyageNumber}"/></td></tr>
+                            <tr><td style="font-weight:bold; padding: 5px;">Completion Time:</td><td style="padding: 5px;"><h:outputText value="#{eventLogger.completionTimeValue}"/></td></tr>
+                        </table>
+                        <br/>
+                        <h:commandButton value="&#9664; Back" action="#{eventLogger.nextStep('dateTab')}" immediate="true"/>
+                        &#160;
+                        <h:commandButton value="Submit" action="#{eventLogger.submit}"/>
+                    </div>
+                </h:panelGroup>
+
+            </h:form>
+
+        </div>
+    </main>
+</h:body>
+</html>

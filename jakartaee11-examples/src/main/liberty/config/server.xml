@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<server description="Cargo Tracker - Jakarta EE 11 on Open Liberty">
+
+    <featureManager>
+        <!-- Jakarta EE 11 Web Profile: Servlet, Faces, Pages, CDI, REST, JSON-B/P,
+             Persistence, Data, Concurrency, Security, Validation, WebSocket, EJB Lite.
+             Prefer it over jakartaee-11.0 unless you need JMS, Batch, Mail or remote EJB:
+             the full platform also starts an ORB, which needs a user registry and an
+             SSL keystore before any application will start. -->
+        <feature>webProfile-11.0</feature>
+        <!-- MicroProfile 7.x: Telemetry replaced Metrics, so there is no /metrics endpoint. -->
+        <feature>microProfile-7.1</feature>
+    </featureManager>
+
+    <!-- Values come from pom.xml (liberty.var.*) or the command line; defaults below. -->
+    <variable name="http.port" defaultValue="9080"/>
+
+    <httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="${http.port}" httpsPort="-1"/>
+
+    <!-- Users and groups come from @InMemoryIdentityStoreDefinition (Jakarta Security 4.0)
+         in cargotracker.config.SecurityConfig. Open Liberty ignores that annotation unless
+         this is set: in-memory stores are for development and tests only. -->
+    <webAppSecurity allowInMemoryIdentityStores="true"/>
+
+    <library id="dbLib">
+        <fileset dir="${shared.resource.dir}" includes="hsqldb*.jar"/>
+    </library>
+
+    <dataSource id="cargoTrackerDataStore" jndiName="jdbc/CargoTrackerDatabase">
+        <jdbcDriver libraryRef="dbLib"/>
+        <properties URL="jdbc:hsqldb:mem:CargoTrackerDB" user="usr" password="pwd"/>
+    </dataSource>
+
+    <!-- Built-in Jakarta Data provider. createTables applies only to repositories whose
+         dataStore is a DataSource (cargotracker.audit.AuditLog); repositories bound to a
+         persistence unit reference follow persistence.xml instead. -->
+    <data createTables="true"/>
+
+    <webApplication contextRoot="/" location="cargo-tracker.war">
+        <classloader commonLibraryRef="dbLib"/>
+    </webApplication>
+
+    <!-- Required by liberty:dev hot reload. -->
+    <applicationMonitor updateTrigger="mbean"/>
+    <applicationManager autoExpand="true"/>
+
+</server>

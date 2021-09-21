@@ -1,0 +1,57 @@
+//
+// Copyright (c) 2020 IBM Corporation and others.
+// Licensed under Creative Commons Attribution-NoDerivatives
+// 4.0 International (CC BY-ND 4.0)
+//   https://creativecommons.org/licenses/by-nd/4.0/
+//
+// Contributors:
+//     IBM Corporation
+//
+:page-description: The `featureUtility help` command displays information about the `featureUtility` command, with details about its actions and options.
+:seo-title: featureUtility help - OpenLiberty.io
+:seo-description: The `featureUtility help` command displays information about the `featureUtility` command, with details about its actions and options.
+:page-layout: general-reference
+:page-type: general
+= featureUtility help
+
+The `featureUtility help` command displays information about the `featureUtility` command, with details about its actions and options.
+
+== Usage example
+
+Display help information for the `installFeature` action:
+
+----
+featureUtility help installFeature
+----
+
+== Syntax
+
+Run the command from the `_path_to_liberty_/wlp/bin` directory.
+
+[subs=+quotes]
+----
+featureUtility help _actionName_
+----
+
+actionName::
+The name of the `featureUtility` command action that you want information about.
+
+== Exit codes
+The following exit codes are available for the `featureUtility help` command:
+
+.Exit codes for the featureUtility help command
+[%header,cols="2,9"]
+|===
+
+|Code
+|Explanation
+
+|0
+|This code indicates successful completion of the requested operation.
+
+|20
+|This code indicates that one or more arguments are not valid.
+
+|21
+|This code indicates that a runtime exception occurred during connection to a repository.
+|===

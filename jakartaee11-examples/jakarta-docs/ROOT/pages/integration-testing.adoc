@@ -1,0 +1,130 @@
+// Copyright (c) 2023 IBM Corporation and others.
+// Licensed under Creative Commons Attribution-NoDerivatives
+// 4.0 International (CC BY-ND 4.0)
+//   https://creativecommons.org/licenses/by-nd/4.0/
+//
+// Contributors:
+//     IBM Corporation
+//
+//
+//
+:page-layout: general-reference
+:page-type: general
+:page-description: Testcontainers is a Java library that facilitates the creation of integration tests that closely resemble production environments. It enables developers to test their applications within the same container used in production, thus reducing discrepancies between development and deployment settings.
+:page-categories: integration testing
+:seo-title: True-to-production integration testing
+:seo-description: Testcontainers is a Java library that facilitates the creation of integration tests that closely resemble production environments. It enables developers to test their applications within the same container used in production, thus reducing discrepancies between development and deployment settings.
+
+= True-to-production integration testing
+
+Testcontainers is a Java library that facilitates the creation of integration tests that closely resemble production environments. It enables developers to test their applications within the same container used in production, thus reducing discrepancies between development and deployment settings.
+
+By using the https://www.testcontainers.org/[Testcontainers] framework, developers can analyze their applications externally, without accessing internal application details. This approach ensures that integration tests accurately evaluate various test classes and components. Although integration tests require more setup and configuration time compared to unit tests, they provide a comprehensive assessment of the application’s behavior in a realistic environment.
+
+Unit tests focus on testing individual modules or components of an application and are quicker to run. Due to shorter development cycles and time constraints, developers often prioritize running unit tests. However, with Testcontainers, developers can efficiently write and run integration tests that closely resemble real-world production scenarios.
+
+== Development and production parity
+
+https://12factor.net/dev-prod-parity[Development and production parity] is one of the factors in the https://12factor.net/[twelve-factor app], which is a methodology to build modern applications.
+The idea behind development and production parity is to keep the development, staging, and production environments similar, regarding time, personnel, and tools.
+To simplify the development process, developers often use tools in development that are different from production.
+For example, you might use a local Maven build to build a project for your application in development, but the application might be deployed to a container in production.
+Differences between the environments can cause a test to fail in production, though the test passes in the development environment.
+Testcontainers helps achieve development and production parity by testing the application in an environment similar to production.
+
+== Writing integration tests with the Testcontainers framework
+
+Testcontainers is a Java library that enables you to thoroughly test your https://microprofile.io/[MicroProfile] and https://jakarta.ee/[Jakarta EE] applications in a testing environment that closely resembles your production setup.
+
+In the following example, Testcontainers is used to start a Docker container that is running an Open Liberty server with a test application deployed. It uses https://rest-assured.io/[REST Assured] to send HTTP requests to the service. This test case adds a person, retrieves all people, and verifies the correctness of the data.
+
+```java
+
+@Testcontainers
+public class ServiceTest {
+
+    // Latest liberty image
+    static final DockerImageName libertyImage = DockerImageName.parse("open-liberty:23.0.0.4-full-java11-openj9");
+
+    // Create container and copy application + server.xml
+    @Container
+    static final GenericContainer<?> liberty = new GenericContainer<>(libertyImage)
+            .withExposedPorts(9080, 9443)
+            .withCopyFileToContainer(MountableFile.forHostPath("build/libs/testapp.war"), "/config/dropins/testapp.war")
+            .withCopyFileToContainer(MountableFile.forHostPath("build/resources/main/liberty/config/server.xml"), "/config/server.xml")
+            .waitingFor(Wait.forLogMessage(".*CWWKZ0001I: Application .* started in .* seconds.*", 1))
+            .withLogConsumer(new LogConsumer(ServiceTest.class, "liberty"));
+
+    // Setup RestAssured to query our service
+    static RequestSpecification requestSpecification;
+
+    @BeforeAll
+    static void getServiceURL() {
+        String baseUri = "http://" + liberty.getHost() + ":" + liberty.getMappedPort(9080) + "/testapp/people";
+        requestSpecification = new RequestSpecBuilder()
+                .setBaseUri(baseUri)
+                .build();
+    }
+
+    // Run our test
+    @Test
+    public void testAddPerson() {
+        // Add new person to service
+        given(requestSpecification)
+            .header("Content-Type", "application/json")
+            .queryParam("name", "bob")
+            .queryParam("age", "24")
+        .when()
+            .post("/")
+        .then()
+            .statusCode(200);
+
+        // Get and verify only one person exists
+        List<Long> allIDs = given(requestSpecification)
+            .accept("application/json")
+        .when()
+            .get("/")
+        .then()
+            .statusCode(200)
+        .extract().body()
+            .jsonPath().getList("id");
+
+        assertEquals(1, allIDs.size());
+
+        // Verify person is bob
+        String actual = given(requestSpecification)
+            .accept("application/json")
+        .when()
+            .get("/" + allIDs.get(0))
+        .then()
+            .statusCode(200)
+        .extract().body()
+            .jsonPath().getString("name");
+
+        assertEquals("bob", actual);
+    }
+```
+
+=== Test Elements
+
+The `@Testcontainers` annotation is a custom Junit5 extension that controls the lifecycle of the Docker container (create, run, stop, and delete) within the scope of this test class.
+
+The `ServiceTest` class starts with a static field `libertyImage`, which represents the Docker image to be used for the test.
+
+The `@Container` annotation marks the field that constructs the Docker container by using the `libertyImage` image. It makes ports `9080` and `9443` accessible and copies the application and server configuration files into the container. It waits for a log message that indicates that the application started successfully and assigns a log consumer for logging container logs.
+
+The `@BeforeAll` annotation marks the method that creates the base URL for the service is constructed by using the host and mapped port of the liberty container. The request specification is created with the base URL.
+
+The `@Test` annotation marks the method that runs a series of tests on the application service.
+
+=== Test Logic
+
+Inside the test method, a new person is added to the service by sending a POST request with JSON payload that contains the name and age parameters.
+
+Upon adding the person, a GET request is sent to retrieve all people from the service. The response is validated to ensure a successful status code `(200)`. The IDs of all the people are extracted from the response by using JSONPath.
+
+The number of IDs is checked to ensure that only one person exists in the service.
+
+Another `GET` request is sent to retrieve the details of the person with the extracted ID. The response is validated to ensure a successful status code `(200)`. The name of the person is extracted from the response by using JSONPath.
+
+Finally, the extracted name is compared with the expected value `bob` using the `assertEquals()` method.

@@ -1,0 +1,102 @@
+//
+// Copyright (c) 2020 IBM Corporation and others.
+// Licensed under Creative Commons Attribution-NoDerivatives
+// 4.0 International (CC BY-ND 4.0)
+//   https://creativecommons.org/licenses/by-nd/4.0/
+//
+// Contributors:
+//     IBM Corporation
+//
+:page-layout: server-command
+:page-type: command
+= server javadump command
+
+The `server javadump` command creates a snapshot of the JVM status of a server and saves the result into an archive file for further tuning and diagnosis.
+
+The command is useful for diagnosing problems at the JVM level, such as hung threads, deadlocks, excessive processing, excessive memory consumption, memory leaks, and defects in the virtual machine. The server must be running for the command to capture results.
+
+Each dump type creates a file, but not all dump types are supported by all virtual machines. The default directory for dump files is `${server.output.dir}`. To set a different default directory, you must use an IBM JVM and set the following environment variables:
+
+* `${IBM_HEAPDUMPDIR}`
+* `${IBM_COREDIR}`
+* `${IBM_JAVACOREDIR}`
+
+The resulting file is created by using UTF-8 encoding for entry names, so the tool that you use to open the file must be able to use UTF-8 encoding for entry names. The `jar` command in a Java SDK uses this format.
+
+== Usage examples
+
+Capture the JVM status of the `myserver` server:
+
+----
+server javadump myserver
+----
+
+Capture the JVM status of the `myserver` server and add a heap dump:
+
+----
+server javadump myserver --include=heap
+----
+
+Capture the JVM status of the `myserver` server and add heap and system dumps:
+
+----
+server javadump myserver --include=heap,system
+----
+
+== Syntax
+
+Run the command from the `_path_to_liberty_/wlp/bin` directory.
+
+[subs=+quotes]
+----
+server javadump _serverName_ [_options_]
+----
+
+serverName::
+The name of the server to diagnose. If the named server is not running or does not exist, the command fails. If no server name is specified, the command uses `defaultServer`.
+
+== Option
+
+.Options for the server javadump command
+[%header,cols=2*]
+|===
+|Option
+|Description
+
+|--include=_diagnose_option,diagnose_option,..._
+a|Specifies the type of diagnostic information to capture. The value of `--include` is a comma-delimited list, which can contain one or more of the following values:
+
+* `heap` is used to help diagnose excessive memory consumption and memory leaks. The dump shows live objects in the memory and references between them. On IBM J9 virtual machines, the resulting file is named `heapdump.date.time.processID.sequenceNumber.phd`. On HotSpot virtual machines, the resulting file is named `java.date.time.processID.sequenceNumber.hprof`.
+
+* `system` is also used to help diagnose excessive memory consumption and memory leaks, but a system dump also helps find defects in the virtual machine. System dumps are only supported on IBM J9 virtual machines. The resulting file is named `core.date.time.processID.sequenceNumber.dmp`.
+|===
+
+
+== Exit codes
+
+The following exit codes are available for the `server javadump` command and the equivalent executable JAR file `ws-server.jar`:
+
+.Exit codes for the server javadump command
+[%header,cols="2,9"]
+|===
+
+|Code
+|Explanation
+
+|0
+|This code indicates successful completion of the requested operation.
+
+|1
+|This code indicates invocation of a redundant operation. For example, starting a started server or stopping a stopped server. This code might also be returned by JVM if invalid Java options are used.
+
+|4
+|This code indicates that an unsupported action was called on a stopped server. For example, the server is not running when the dump action is called.
+
+|>=20
+|Exit codes that are greater than or equal to 20 indicate that an error occurred while performing the request. Messages are printed and captured in log files with more information about the error.
+|===
+
+== See also
+
+* xref:command/server-dump.adoc[server dump]
+* xref:command/server-list.adoc[server list]

@@ -1,0 +1,25 @@
+micronaut:
+  application:
+    name: micronaut
+  server:
+    port: 22261
+
+datasources:
+  default:
+    url: jdbc:h2:mem:books;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driverClassName: org.h2.Driver
+    username: sa
+    password: ''
+    schema-generate: CREATE_DROP
+    dialect: H2
+
+jpa:
+  default:
+    properties:
+      hibernate:
+        hbm2ddl:
+          auto: update
+        show_sql: false
+
+# seed data
+jpa.default.properties.hibernate.hbm2ddl.import_files: import.sql

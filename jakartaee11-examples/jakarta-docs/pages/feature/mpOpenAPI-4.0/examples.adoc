@@ -1,0 +1,73 @@
+
+[#mm]
+=== Configure OpenAPI documentation for a multi-module application
+
+// This example only applies to 4.0 forward, and so the file and directory must be manually copied and applied to any new versions. Copy the directory and file and change the directory name to reflect the new feature version, for example `mpOpenAPI-4.1`.
+
+In MicroProfile OpenAPI 4.0 and later, all deployed applications and modules are included in the OpenAPI documentation by default. However, you can configure which applications and modules are included.
+
+For example, the following configuration is for the `sample_app` application, which consists of an `EAR` file containing five web modules.
+
+[source,xml]
+----
+<mpOpenAPI>
+  <excludeModule>sample_app/module-3</excludeModule>
+  <excludeModule>sample_app/module-5</excludeModule>
+  <info title="A multi-module sample application"
+        description="This is a sample application."
+        version="2.0.1"
+        termsOfService="http://example.com/sample_app/terms"
+        contactName="API Support"
+        contactUrl="http://www.example.com/sample_app/support"
+        contactEmail="sample_app_support@example.com"
+        licenseName="License 2.0"
+        licenseUrl="https://www.example.org/licenses/LICENSE-2.0.html"
+        />
+</mpOpenAPI>
+----
+
+- The `excludeModule` elements exclude the `module-3` and `module-5` web modules.
+
+- The `info` element sets the info section for the final OpenAPI document, which documents web modules 1, 2, and 4.
+
+==== Naming applications and modules
+
+- The application name is determined by the value of the `name` attribute when the application is deployed in `server.xml` using `application`, `webApplication`, or `enterpriseApplication`. For example:
++
+[source,xml]
+----
+<webApplication name="application1" location="application1-v1.war" />
+----
++
+If the application is deployed in the `dropins` directory or if the `name` attribute is not specified, the name defaults to the archive filename without the file extension.
++
+- The module name is specified in the web module's `web.xml` file. If no `web.xml` file exists or if it does not specify a name, the module name defaults to the file name without the file extension.
+
+For more information, see xref:ROOT:documentation-openapi.adoc#multi-module[Multiple application and multi-module application support with MicroProfile OpenAPI].
+
+
+=== Override the info section in the OpenAPI document
+
+You can override the `info` section of the OpenAPI document specifying the `info` element within the `mpOpenAPI` element:
+
+[source,xml]
+----
+<mpOpenAPI>
+  <info title="Example API"
+        version="1.0"
+        description="This is an example API"/>
+</mpOpenAPI>
+----
+
+Overriding the `info` section is useful for documenting multiple modules or applications. Without an override, the `info` section is a standard version that indicates that documentation from several modules was merged.
+
+[#apiversion]
+=== Selecting the OpenAPI specification version
+If you are using a feature that supports more than one version of the OpenAPI specification, you can switch between versions with configuration. You might need to do this if you or your users use tools or libraries that don't yet support a newer version of the OpenAPI specification.
+
+For example, `mpOpenAPI-4.0` defaults to OpenAPI 3.1, but you can specify the following configuration to set it to OpenAPI 3.0.
+
+[source,xml]
+----
+<mpOpenAPI openAPIVersion="3.0"/>
+----

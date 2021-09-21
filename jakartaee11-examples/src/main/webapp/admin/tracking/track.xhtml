@@ -1,0 +1,14 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets">
+<ui:composition template="/WEB-INF/templates/common/admin.xhtml">
+    <ui:define name="title">Track Cargo</ui:define>
+    <ui:define name="content">
+        <div class="content-narrow">
+            <ui:include src="/WEB-INF/fragments/tracking.xhtml">
+                <ui:param name="showDetailsLink" value="#{true}"/>
+                <ui:param name="showMap" value="#{false}"/>
+            </ui:include>
+        </div>
+    </ui:define>
+</ui:composition>
+</html>

@@ -1,0 +1,52 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="jakarta.faces.core"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets">
+<ui:composition template="/WEB-INF/templates/common/admin.xhtml">
+    <ui:define name="title">Live Map</ui:define>
+    <ui:define name="content">
+        <div id="container" class="ui-g-10 ui-g-offset-1">
+            <section class="live-map-panel" aria-label="Live cargo map">
+                <div id="live-cargo-map" class="live-cargo-map"></div>
+                <button id="live-map-status" class="live-map-status" type="button">Connecting</button>
+            </section>
+
+            <h:form id="mapSelectionForm">
+                <h:commandScript name="selectCargo"
+                                 actionListener="#{cargoDetails.select}"
+                                 execute="@this"
+                                 render=":cargo-details"
+                                 onevent="handleCargoSelection"/>
+            </h:form>
+
+            <h:panelGroup id="cargo-details"
+                          layout="block"
+                          styleClass="#{empty cargoDetails.cargo
+                              ? 'cargo-details-panel cargo-details-panel-empty'
+                              : 'cargo-details-panel'}">
+                <ui:include src="/WEB-INF/fragments/cargo-details.xhtml"/>
+            </h:panelGroup>
+        </div>
+        <h:outputStylesheet name="leaflet/leaflet.css"/>
+        <h:outputScript name="leaflet/leaflet.js"/>
+        <h:outputScript name="js/cargo-map.js"/>
+        <h:outputScript>
+            function handleCargoSelection(event) {
+                if (event.status === "success") {
+                    document.getElementById("cargo-details")
+                        .scrollIntoView({behavior: "smooth", block: "start"});
+                }
+            }
+
+            CargoMap.initialize({
+                elementId: "live-cargo-map",
+                statusElementId: "live-map-status",
+                cargoUri: "#{request.contextPath}/rest/cargo",
+                onCargoSelected: function (cargo) {
+                    selectCargo({trackingId: cargo.trackingId});
+                }
+            });
+        </h:outputScript>
+    </ui:define>
+</ui:composition>
+</html>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<server description="Jakarta EE 11 book demo">
+
+	<featureManager>
+		<feature>jakartaee-11.0</feature>
+	</featureManager>
+
+	<!-- free port picked for this demo; change if it clashes -->
+	<httpEndpoint id="defaultHttpEndpoint"
+				  host="*"
+				  httpPort="20493"
+				  httpsPort="24443"/>
+
+	<!-- required by ORB/EJB pieces of the full EE 11 profile -->
+	<quickStartSecurity userName="demo" userPassword="demo"/>
+
+	<applicationManager autoExpand="true"/>
+
+	<webApplication location="openliberty.war" contextRoot="/openliberty"/>
+
+</server>

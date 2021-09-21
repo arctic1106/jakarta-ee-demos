@@ -1,0 +1,647 @@
+// Copyright (c) 2019,2020 IBM Corporation and others.
+// Licensed under Creative Commons Attribution-NoDerivatives
+// 4.0 International (CC BY-ND 4.0)
+//   https://creativecommons.org/licenses/by-nd/4.0/
+//
+// Contributors:
+//     IBM Corporation
+//
+:page-layout: general-reference
+:page-type: general
+:seo-title: Open Liberty security vulnerability (CVEs) list - OpenLiberty.io.
+:seo-description: A list of the CVEs that affect Open Liberty, ordered by the release in which they were fixed.
+= Security vulnerability (CVE) list
+
+The Common Vulnerabilities and Exposures (CVE) system is a reference of publicly known network vulnerabilities that is maintained by the US National Institute of Standards and Technology (NIST). The CVE list catalogs known cybersecurity vulnerabilities.
+
+The following table lists the CVEs that affect Open Liberty, ordered by the release in which they were fixed. The table also includes the Liberty features that are affected by each CVE. You can determine whether your Liberty configuration might be affected by a CVE by reviewing the features that are installed and running on your server. Occasionally, Liberty features that are not specified in the `server.xml` file are enabled automatically by other features. To confirm whether a particular feature is enabled in a Liberty server, inspect the `CWWKF0012I` message in the `console.log`, `messages.log`, or `trace.log` files from the Liberty server. This message provides a comprehensive list of all the features that are installed and running on the Liberty server.
+
+[source,console]
+----
+CWWKF0012I: The server installed the following features: [appSecurity-2.0, distributedMap-1.0, jndi-1.0, samlWeb-2.0, ssl-1.0].
+----
+
+The `CWWKF0012I` message uses the word "installed", but it lists features that are both installed and running on the Liberty server.
+
+
+[cols="6*"]
+|===
+|CVE |CVSS score |Vulnerability assessment |Versions affected |Version fixed |Notes
+
+|https://www.cve.org/CVERecord?id=CVE-2026-3621[CVE-2026-3621]
+|7.5
+|Identity spoofing
+|17.0.0.3-26.0.0.4
+|26.0.0.5
+|
+
+|https://www.cve.org/CVERecord?id=CVE-2025-14915[CVE-2025-14915]
+|6.5
+|Privilege escalation
+|17.0.0.3-26.0.0.3
+|26.0.0.4
+|Affects the feature:restConnector-2.0[] feature
+
+|https://www.cve.org/CVERecord?id=CVE-2025-14917[CVE-2025-14917]
+|6.7
+|Weaker security
+|17.0.0.3-26.0.0.3
+|26.0.0.4
+|Affects the feature:appSecurity-1.0[], feature:appSecurity-2.0[], feature:appSecurity-3.0[], feature:appSecurity-4.0[], and feature:appSecurity-5.0[] features
+
+|https://www.cve.org/CVERecord?id=CVE-2026-1561[CVE-2026-1561]
+|5.4
+|Server-side request forgery
+|17.0.0.3-26.0.0.3
+|26.0.0.4
+|Affects the feature:samlWeb-2.0[] feature
+
+|https://www.cve.org/CVERecord?id=CVE-2026-29063[CVE-2026-29063]
+|8.7
+|Prototype pollution
+|17.0.0.3-26.0.0.3
+|26.0.0.4
+|Affects the feature:openapi-3.1[], feature:mpOpenAPI-1.0[], feature:mpOpenAPI-1.1[], feature:mpOpenAPI-2.0[], feature:mpOpenAPI-3.0[], feature:mpOpenAPI-3.1[], feature:mpOpenAPI-4.0[] and feature:mpOpenAPI-4.1[] features
+
+|https://www.cve.org/CVERecord?id=CVE-2025-14923[CVE-2025-14923]
+|4.7
+|Weaker security
+|17.0.0.3-26.0.0.2
+|26.0.0.3
+|
+
+|https://www.cve.org/CVERecord?id=CVE-2024-29371[CVE-2024-29371]
+|7.5
+|Denial of service
+|21.0.0.3-26.0.0.2
+|26.0.0.3
+|Affects the feature:openidConnectClient-1.0[], feature:socialLogin-1.0[], feature:mpJwt-1.2[], feature:mpJwt-2.0[], feature:mpJwt-2.1[], and feature:jwt-1.0[] features
+
+|https://www.cve.org/CVERecord?id=CVE-2025-14914[CVE-2025-14914]
+|7.6
+|Remote code execution
+|17.0.0.3-26.0.0.1
+|26.0.0.2
+|Affects the feature:restConnector-2.0[] feature
+
+|https://www.cve.org/CVERecord?id=CVE-2025-12635[CVE-2025-12635]
+|5.4
+|Cross-site scripting
+|17.0.0.3-25.0.0.12
+|26.0.0.1
+|Affects the feature:servlet-3.1[], feature:servlet-4.0[], feature:servlet-5.0[] and feature:servlet-6.0[] features
+
+|https://www.cve.org/CVERecord?id=CVE-2025-7962[CVE-2025-7962]
+|7.5
+|SMTP injection
+|17.0.0.3-25.0.0.11
+|25.0.0.12
+|Affects the feature:javaMail-1.5[], feature:javaMail-1.6[], feature:mail-2.0[] and feature:mail-2.1[] features
+
+|https://www.cve.org/CVERecord?id=CVE-2020-36732[CVE-2020-36732] 
+|5.3
+|Weaker security
+|17.0.0.3-25.0.0.9
+|25.0.0.10
+|Affects the feature:openidConnectServer-1.0[] feature 
+
+|https://www.cve.org/CVERecord?id=CVE-2025-36000[CVE-2025-36000] 
+|4.4
+|Stored cross-site scripting
+|17.0.0.3-25.0.0.8
+|25.0.0.9
+|Affects the feature:adminCenter-1.0[] feature 
+
+|https://www.cve.org/CVERecord?id=CVE-2025-36047[CVE-2025-36047] 
+|5.3
+|Denial of service
+|18.0.0.2-25.0.0.8
+|25.0.0.9
+|Affects the feature:servlet-3.1[], feature:servlet-4.0[], feature:servlet-5.0[], and feature:servlet-6.0[] features
+
+|https://www.cve.org/CVERecord?id=CVE-2025-48976[CVE-2025-48976]
+|7.5
+|Denial of service
+|17.0.0.3-25.0.0.8
+|25.0.0.9
+|Affects the feature:servlet-3.1[], feature:servlet-4.0[], feature:servlet-5.0[], and feature:servlet-6.0[] features
+
+|https://www.cve.org/CVERecord?id=CVE-2025-36124[CVE-2025-36124]
+|5.9
+|Bypass security
+|17.0.0.3-25.0.0.8
+|25.0.0.9
+|Affects the feature:wasJmsServer-1.0[], feature:wasJmsSecurity-1.0[], feature:wasJmsClient-2.0[], feature:messagingServer-3.0[], feature:messagingSecurity-3.0[], and feature:messagingClient-3.0[] features
+
+|https://www.cve.org/CVERecord?id=CVE-2024-56339[CVE-2024-56339]
+|3.7
+|Bypass security
+|17.0.0.3 - 25.0.0.7
+|25.0.0.8
+|Affects the feature:servlet-3.1[], feature:servlet-4.0[], feature:servlet-5.0[], and feature:servlet-6.0[] features
+
+|https://www.cve.org/CVERecord?id=CVE-2025-36097[CVE-2025-36097]
+|7.5
+|Denial of service
+|17.0.0.3 - 25.0.0.7
+|25.0.0.8
+|Affects the feature:jsonp-1.0[], feature:jsonp-1.1[], and feature:jsonp-2.0[] features
+
+|https://www.cve.org/CVERecord?id=CVE-2025-25193[CVE-2025-25193]
+|5.5
+|Denial of service
+|21.0.0.2 - 25.0.0.3
+|25.0.0.4
+|Affects the feature:grpc-1.0[] and feature:grpcClient-1.0[] features
+
+|https://www.cve.org/CVERecord?id=CVE-2025-23184[CVE-2025-23184]
+|5.9
+|Denial of service
+|17.0.0.3 - 25.0.0.3
+|25.0.0.4
+|Affects the feature:jaxws-2.2[], feature:xmlWS-3.0[] and feature:xmlWS-4.0[] features
+
+|https://www.cve.org/CVERecord?id=CVE-2024-47535[CVE-2024-47535]
+|5.5
+|Denial of service
+|21.0.0.2 - 25.0.0.1
+|25.0.0.2
+|Affects the feature:grpc-1.0[] and feature:grpcClient-1.0[] features
+
+|https://www.cve.org/CVERecord?id=CVE-2024-40094[CVE-2024-40094]
+|5.3
+|Denial of service
+|20.0.0.6 - 24.0.0.11
+|24.0.0.12
+|Affects the feature:mpGraphQL-1.0[] and feature:mpGraphQL-2.0[] features
+
+|https://www.cve.org/CVERecord?id=CVE-2024-7254[CVE-2024-7254]
+|7.5
+|Denial of service
+|20.0.0.12 - 24.0.0.10
+|24.0.0.11
+|Affects the feature:grpc-1.0[] and feature:grpcClient-1.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2023-50314[CVE-2023-50314]
+|5.3
+|Information disclosure
+|17.0.0.3 - 24.0.0.8
+|24.0.0.9
+|
+
+|http://www.cve.org/CVERecord?id=CVE-2024-22354[CVE-2024-22354]
+|7.0
+|XML External Entity (XXE) injection
+|17.0.0.3 - 24.0.0.5
+|24.0.0.6
+|
+
+|http://www.cve.org/CVERecord?id=CVE-2024-27268[CVE-2024-27268]
+|5.9
+|Denial of service
+|18.0.0.2 - 24.0.0.4
+|24.0.0.5
+|Affects the feature:servlet-3.1[], feature:servlet-4.0[], feature:servlet-5.0[] and feature:servlet-6.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2024-22353[CVE-2024-22353]
+|5.9
+|Denial of service
+|17.0.0.3 - 24.0.0.4
+|24.0.0.5
+|Affects the feature:openidConnectClient-1.0[], and feature:socialLogin-1.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2024-25026[CVE-2024-25026]
+|5.9
+|Denial of service
+|17.0.0.3 - 24.0.0.4
+|24.0.0.5
+|Affects the feature:servlet-3.1[], feature:servlet-4.0[], feature:servlet-5.0[] and feature:servlet-6.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2023-51775[CVE-2023-51775]
+|7.5
+|Denial of service
+|21.0.0.3 - 24.0.0.3
+|24.0.0.4
+|Affects the feature:openidConnectClient-1.0[], feature:socialLogin-1.0[], feature:mpJwt-1.2[], feature:mpJwt-2.0[], feature:mpJwt-2.1[], feature:jwt-1.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2024-27270[CVE-2024-27270]
+|4.7
+|Cross-site scripting
+|23.0.0.3 - 24.0.0.3
+|24.0.0.4
+|Affects the feature:servlet-6.0[] feature
+
+|http://www.cve.org/CVERecord?id=CVE-2023-50312[CVE-2023-50312]
+|5.3
+|Weaker security
+|17.0.0.3 - 24.0.0.2
+|24.0.0.3
+|
+
+|http://www.cve.org/CVERecord?id=CVE-2023-44487[CVE-2023-44487]
+|7.5
+|Denial of service
+|18.0.0.2 - 23.0.0.11
+|23.0.0.12
+|Affects the feature:servlet-3.1[], feature:servlet-4.0[], feature:servlet-5.0[] and feature:servlet-6.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2023-44483[CVE-2023-44483]
+|6.5
+|Information disclosure
+|17.0.0.3 - 23.0.0.11
+|23.0.0.12
+|Affects the feature:wsSecurity-1.1[], feature:wsSecuritySaml-1.1[] and feature:samlWeb-2.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2023-46158[CVE-2023-46158]
+|4.9
+|Weaker security
+|23.0.0.9 - 23.0.0.10
+|23.0.0.11
+|Affects the feature:appSecurity-1.0[], feature:appSecurity-2.0[], feature:appSecurity-3.0[], feature:appSecurity-4.0[] and feature:appSecurity-5.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2023-38737[CVE-2023-38737]
+|5.9
+|Denial of service
+|22.0.0.13 - 23.0.0.7
+|23.0.0.8
+|Affects the feature:restfulWS-3.0[] and feature:restfulWS-3.1[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2023-28867[CVE-2023-28867]
+|7.5
+|Denial of service
+|17.0.0.3 - 23.0.0.5
+|23.0.0.6
+|Affects the feature:mpGraphQL-1.0[] and feature:mpGraphQL-2.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2023-24998[CVE-2023-24998]
+|7.5
+|Denial of service
+|17.0.0.3 - 23.0.0.3
+|23.0.0.4
+|Affects the feature:servlet-3.1[], feature:servlet-4.0[], feature:servlet-5.0[] and feature:servlet-6.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2023-0482[CVE-2023-0482]
+|5.3
+|Privilege escalation
+|21.0.0.12 - 23.0.0.3
+|23.0.0.4
+|Affects the feature:restfulWS-3.0[] and feature:restfulWS-3.1[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2022-45787[CVE-2022-45787]
+|5.5
+|Information disclosure
+|21.0.0.12 - 23.0.0.1
+|23.0.0.2
+|Affects the feature:restfulWS-3.0[] feature
+
+|http://www.cve.org/CVERecord?id=CVE-2022-46364[CVE-2022-46364]
+|9.8
+|Server-side request forgery
+|17.0.0.3 - 23.0.0.1
+|23.0.0.2
+|Affects the feature:jaxws-2.2[] feature
+
+|http://www.cve.org/CVERecord?id=CVE-2022-3509[CVE-2022-3509]
+|5.7
+|Denial of service
+|21.0.0.2 - 22.0.0.12
+|22.0.0.13
+|Affects the feature:grpc-1.0[] and feature:grpcClient-1.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2022-3171[CVE-2022-3171]
+|5.7
+|Denial of service
+|21.0.0.2 - 22.0.0.12
+|22.0.0.13
+|Affects the feature:grpc-1.0[] and feature:grpcClient-1.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2022-37734[CVE-2022-37734]
+|7.5
+|Denial of service
+|17.0.0.3 - 22.0.0.11
+|22.0.0.12
+|Affects the feature:mpGraphQL-1.0[] and feature:mpGraphQL-2.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2022-24839[CVE-2022-24839]
+|7.5
+|Denial of service
+|17.0.0.3 - 22.0.0.10
+|22.0.0.11
+|Affects the feature:openid-2.0[] feature
+
+|http://www.cve.org/CVERecord?id=CVE-2022-34165[CVE-2022-34165]
+|5.4
+|HTTP header injection
+|17.0.0.3 - 22.0.0.9
+|22.0.0.10
+|
+
+|http://www.cve.org/CVERecord?id=CVE-2022-22476[CVE-2022-22476]
+|5
+|Identity spoofing
+|17.0.0.3 - 22.0.0.7
+|22.0.0.8
+|Affects the feature:appSecurity-1.0[], feature:appSecurity-2.0[], feature:appSecurity-3.0[] and feature:appSecurity-4.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2022-22475[CVE-2022-22475]
+|7.1
+|Identity spoofing
+|17.0.0.3 - 22.0.0.5
+|22.0.0.6
+|Affects the feature:appSecurity-1.0[], feature:appSecurity-2.0[], feature:appSecurity-3.0[] and feature:appSecurity-4.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2022-22393[CVE-2022-22393]
+|3.1
+|Information disclosure
+|17.0.0.3 - 22.0.0.5
+|22.0.0.6
+|Affects the feature:adminCenter-1.0[] feature
+
+|http://www.cve.org/CVERecord?id=CVE-2021-39038[CVE-2021-39038]
+|4.4
+|Clickjacking vulnerability
+|17.0.0.3 - 22.0.0.2
+|22.0.0.3
+|Affects the feature:openapi-3.1[], feature:mpOpenAPI-1.0[], feature:mpOpenAPI-1.1[] and feature:mpOpenAPI-2.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2021-23450[CVE-2021-23450]
+|9.8
+|Remote code execution
+|17.0.0.3 - 22.0.0.2
+|22.0.0.3
+|Affects the feature:admin-Center-1.0[] feature
+
+|http://www.cve.org/CVERecord?id=CVE-2021-46708[CVE-2021-46708]
+|4.3
+|Clickjacking
+|21.0.0.12 - 22.0.0.1
+|22.0.0.2
+|Affects the feature:openapi-3.1[], feature:mpOpenAPI-1.0[], feature:mpOpenAPI-1.1[], feature:mpOpenAPI-2.0[] and feature:mpOpenAPI-3.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2018-25031[CVE-2018-25031]
+|5.4
+|Spoofing attack
+|21.0.0.12 - 22.0.0.1
+|22.0.0.2
+|Affects the feature:openapi-3.1[], feature:mpOpenAPI-1.0[], feature:mpOpenAPI-1.1[], feature:mpOpenAPI-2.0[] and feature:mpOpenAPI-3.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2021-39031[CVE-2021-39031]
+|7.5
+|LDAP injection
+|17.0.0.3 - 22.0.0.1
+|22.0.0.2
+|Affects the feature:ldapRegistry-3.0[] feature
+
+|http://www.cve.org/CVERecord?id=CVE-2022-22310[CVE-2022-22310]
+|4.8
+|Information disclosure
+|21.0.0.10 - 21.0.0.12
+|22.0.0.1
+|Affects the feature:jaxws-2.2[] feature
+
+|http://www.cve.org/CVERecord?id=CVE-2021-36090[CVE-2021-36090]
+|7.5
+|Denial of service
+|17.0.0.3 - 21.0.0.9
+|21.0.0.10
+|
+
+|http://www.cve.org/CVERecord?id=CVE-2021-35517[CVE-2021-35517]
+|5.5
+|Denial of service
+|17.0.0.3 - 21.0.0.9
+|21.0.0.10
+|
+
+|http://www.cve.org/CVERecord?id=CVE-2021-29842[CVE-2021-29842]
+|3.7
+|Information disclosure
+|17.0.0.3 - 21.0.0.9
+|21.0.0.10
+|Affects the feature:federatedRegistry-1.0[] feature
+
+|http://www.cve.org/CVERecord?id=CVE-2021-26296[CVE-2021-26296]
+|8.8
+|Cross-site request forgery
+|17.0.0.3 - 21.0.0.3
+|21.0.0.4
+|Affects the feature:jsf-2.2[] and feature:jsf-2.3[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2020-10693[CVE-2020-10693]
+|5.3
+|Bypass security
+|17.0.0.3 - 20.0.0.10
+|20.0.0.11
+|Affects the feature:beanValidation-2.0[] feature
+
+|http://www.cve.org/CVERecord?id=CVE-2020-4590[CVE-2020-4590]
+|5.3
+|Denial of service
+|19.0.0.5 - 20.0.0.9
+|20.0.0.10
+|Affects the feature:oauth-2.0[] and feature:openidConnectServer-1.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2020-4421[CVE-2020-4421]
+|5
+|Identity spoofing
+|19.0.0.5 - 20.0.0.4
+|20.0.0.5
+|Affects the feature:openidConnectServer-1.0[] feature
+
+|http://www.cve.org/CVERecord?id=CVE-2020-4329[CVE-2020-4329]
+|4.3
+|Information disclosure
+|17.0.0.3 - 20.0.0.4
+|20.0.0.5
+|Affects the feature:servlet-3.1[], feature:servlet-4.0[], feature:appSecurity-2.0[], and feature:appSecurity-3.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2020-4303[CVE-2020-4303]
+|6.1
+|Cross-site scripting
+|17.0.0.3 - 20.0.0.3
+|20.0.0.4
+|Affects the feature:oauth-2.0[], feature:openidConnectClient-1.0[], feature:openidConnectServer-1.0[], and feature:samlWeb-2.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2020-4304[CVE-2020-4304]
+|6.1
+|Cross-site scripting
+|17.0.0.3 - 20.0.0.3
+|20.0.0.4
+|Affects the feature:oauth-2.0[], feature:openidConnectClient-1.0[], feature:openidConnectServer-1.0[], and feature:samlWeb-2.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2019-17573[CVE-2019-17573]
+|6.1
+|Cross-site scripting
+|17.0.0.3 - 20.0.0.2
+|20.0.0.3
+|Affects the feature:jaxws-2.2[] feature
+
+|http://www.cve.org/CVERecord?id=CVE-2019-12406[CVE-2019-12406]
+|5.3
+|Denial of service
+|17.0.0.3 - 20.0.0.1
+|20.0.0.2
+|Affects the feature:jaxrs-2.0[], feature:jaxrs-2.1[], and feature:jaxws-2.2[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2019-4720[CVE-2019-4720]
+|7.5
+|Denial of service
+|17.0.0.3 - 20.0.0.1
+|20.0.0.2
+|
+
+|http://www.cve.org/CVERecord?id=CVE-2019-17495[CVE-2019-17495]
+|5.3
+|Information disclosure
+|17.0.0.3 - 19.0.0.12
+|20.0.0.1
+|Affects the feature:mpOpenAPI-1.0[], feature:mpOpenAPI-1.1[], and feature:openapi-3.1[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2019-4441[CVE-2019-4441]
+|5.3
+|Information disclosure
+|17.0.0.3 - 19.0.0.10
+|19.0.0.11
+|Affects the feature:jsp-2.2[] and feature:jsp-2.3[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2014-3603[CVE-2014-3603]
+|6.8
+|Spoofing
+|17.0.0.3 - 19.0.0.10
+|19.0.0.11
+|Affects the feature:wsSecurity-1.1[] and feature:samlWeb-2.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2019-9518[CVE-2019-9518]
+|7.5
+|Denial of service
+|17.0.0.3 - 19.0.0.9
+|19.0.0.10
+|Affects the feature:servlet-3.1[] and feature:servlet-4.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2019-9517[CVE-2019-9517]
+|7.5
+|Denial of service
+|17.0.0.3 - 19.0.0.9
+|19.0.0.10
+|Affects the feature:servlet-3.1[] and feature:servlet-4.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2019-9515[CVE-2019-9515]
+|7.5
+|Denial of service
+|17.0.0.3 - 19.0.0.9
+|19.0.0.10
+|Affects the feature:servlet-3.1[] and feature:servlet-4.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2019-9514[CVE-2019-9514]
+|7.5
+|Denial of service
+|17.0.0.3 - 19.0.0.9
+|19.0.0.10
+|Affects the feature:servlet-3.1[] and feature:servlet-4.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2019-9513[CVE-2019-9513]
+|7.5
+|Denial of service
+|17.0.0.3 - 19.0.0.9
+|19.0.0.10
+|Affects the feature:servlet-3.1[] and feature:servlet-4.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2019-9512[CVE-2019-9512]
+|7.5
+|Denial of service
+|17.0.0.3 - 19.0.0.9
+|19.0.0.10
+|Affects the feature:servlet-3.1[] and feature:servlet-4.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2019-4304[CVE-2019-4304]
+|6.3
+|Bypass security
+|17.0.0.3 - 19.0.0.9
+|19.0.0.10
+|Affects the feature:appSecurity-1.0[] and feature:appSecurity-2.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2019-4305[CVE-2019-4305]
+|5.3
+|Information disclosure
+|17.0.0.3 - 19.0.0.9
+|19.0.0.10
+|Affects the feature:appSecurity-1.0[] and feature:appSecurity-2.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2014-3603[CVE-2014-3603]
+|6.5
+|Man-in-the-Middle
+|17.0.0.3 - 19.0.0.7
+|19.0.0.8
+|Affects the feature:wsSecurity-1.1[] and feature:samlWeb-2.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2019-4046[CVE-2019-4046]
+|5.9
+|Denial of service
+|17.0.0.3 - 19.0.0.3
+|19.0.0.4
+|Affects the feature:servlet-3.1[] and feature:servlet-4.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2018-1902[CVE-2018-1902]
+|3.1
+|Spoofing
+|17.0.0.3 - 19.0.0.2
+|19.0.0.3
+|Affects the feature:servlet-3.1[] and feature:servlet-4.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2018-1901[CVE-2018-1901]
+|5.0
+|Privilege escalation
+|17.0.0.3 - 18.0.0.3
+|18.0.0.4
+|Affects the feature:ldapRegistry-3.0[] feature
+
+|http://www.cve.org/CVERecord?id=CVE-2014-7810[CVE-2014-7810]
+|5.0
+|Bypass security
+|17.0.0.3 - 18.0.0.3
+|18.0.0.4
+|Affects the feature:jsp-2.2[], feature:jsp-2.3[], and feature:el-3.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2018-8039[CVE-2018-8039]
+|7.5
+|Man-in-the-Middle
+|17.0.0.3 - 18.0.0.2
+|18.0.0.3
+|Affects the feature:jaxws-2.2[], feature:jaxrs-2.0[], and feature:jaxrs-2.1[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2018-1755[CVE-2018-1755]
+|5.9
+|Information disclosure
+|17.0.0.3 - 18.0.0.2
+|18.0.0.3
+|Affects the feature:jaspic-1.1[] feature
+
+|http://www.cve.org/CVERecord?id=CVE-2018-1683[CVE-2018-1683]
+|5.9
+|Information disclosure
+|17.0.0.3 - 18.0.0.2
+|18.0.0.3
+|Affects the feature:ejbRemote-3.2[] feature
+
+|http://www.cve.org/CVERecord?id=CVE-2017-12624[CVE-2017-12624]
+|5.3
+|Denial of service
+|17.0.0.3 - 17.0.0.4
+|18.0.0.1
+|Affects the feature:jaxws-2.2[], feature:jaxrs-2.0[], and feature:jaxrs-2.1[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2017-1788[CVE-2017-1788]
+|5.3
+|Spoofing
+|17.0.0.3 - 17.0.0.4
+|18.0.0.1
+|Affects any feature that enables security, for example, the feature:appSecurity-2.0[], feature:appSecurity-3.0[], and feature:restConnector-2.0[] features
+
+|http://www.cve.org/CVERecord?id=CVE-2016-1000031[CVE-2016-100031]
+|9.8
+|Execute code
+|17.0.0.3 - 17.0.0.4
+|18.0.0.1
+|Affects the feature:servlet-3.1[] and feature:servlet-4.0[] features
+
+|===

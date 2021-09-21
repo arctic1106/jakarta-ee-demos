@@ -1,0 +1,196 @@
+//
+// Copyright (c) 2022 IBM Corporation and others.
+// Licensed under Creative Commons Attribution-NoDerivatives
+// 4.0 International (CC BY-ND 4.0)
+//   https://creativecommons.org/licenses/by-nd/4.0/
+//
+// Contributors:
+//     IBM Corporation
+//
+:page-description: The `securityUtility createSSLCertificate` command supports TLS certificate creation for Open Liberty.
+:seo-title: securityUtility createSSLCertificate - OpenLiberty.io
+:seo-description: The `securityUtility createSSLCertificate` command supports TLS certificate creation for Open Liberty.
+:page-layout: general-reference
+:page-type: general
+= securityUtility createSSLCertificate
+
+The `securityUtility createSSLCertificate` command supports TLS certificate creation for Open Liberty.
+
+This command creates a default keystore that includes a self-signed TLS certificate for use in a server or client configuration.
+For version 19.0.0.3 and later, the default keystore location is the `resource/security/key.p12` file of the server or client directory.
+Through version 19.0.0.2, the default keystore location is the `resource/security/key.jks` file of the server or client directory.
+
+== Usage example
+
+Create a TLS certificate for the `myserver` server with the `mypassword` password. Set the validity period to 365 days:
+
+----
+securityUtility createSSLCertificate --server=myserver --password=mypassword --validity=365
+----
+
+
+Create an SSL certificate by using a Base64-encoded AES-256 key to encrypt the keystore password, specify the `--passwordBase64Key` option:
+
+[source,sh]
+----
+securityUtility createSSLCertificate \
+  --password=password \
+  --passwordEncoding=aes \
+  --passwordBase64Key=<your_base64_key> \
+  --server=server1
+----
+
+
+Create an SSL certificate by using a configuration file that contains the AES key variable:
+
+[source,sh]
+----
+securityUtility createSSLCertificate \
+  --password=password \
+  --passwordEncoding=aes \
+  --aesConfigFile=aesConfig.xml \
+  --server=server1
+----
+
+
+== Syntax
+
+Run the command from the `_path_to_liberty_/wlp/bin` directory. You must specify either the `server` or `client` option or the command fails. The keystore password must be at least six characters long. If the `password` option is not specified, you’re prompted for a password value when you run this command.
+
+Use the following syntax to create a keystore and certificate for an Open Liberty server.
+
+[subs=+quotes]
+----
+securityUtility createSSLCertificate --server=_serverName_ --password=_pwd_ [_options_]
+----
+
+Use the following syntax to create a keystore and certificate for an Open Liberty client
+
+[subs=+quotes]
+----
+securityUtility createSSLCertificate --client=_clientName_ --password=_pwd_ [_options_]
+----
+
+== Options
+
+.Options for the securityUtility createSSLCertificate command
+[%header,cols=2*]
+|===
+|Option
+|Description
+
+|--client=_name_
+|Specifies the name of the Open Liberty client for which the keystore and certificate are created.
+This option can't be used if the `--server` option is specified. This option is required when the `--server` option is not specified.
+
+|--extInfo
+|Specifies any X.509 certificate extension information that is used to create the default certificate.
+By default, the Subject Alternative Name (SAN) extension is added to the certificate with the hostname of the server.
+{empty} +
+{empty} +
+If the `--extInfo` option is used, the value is passed directly to the https://docs.oracle.com/en/java/javase/13/docs/specs/man/keytool.html[keytool command].
+Use the syntax of the `--ext` flag on the `keytool` command.
+{empty} +
+{empty} +
+You can use more than one `--extInfo` option with a single command, for example, `--extInfo="san=dns:laptop" --extInfo="ExtendedKeyUsage=serverAuth,clientAuth"`.
+
+|--keySize=_size_
+|Specifies the certificate key bit size.
+The default value is `2048`.
+
+|--keyType=_keystore_type_
+|Specifies the keystore type to generate.
+By default, a PKCS12 keystore is generated.
+To generate a JKS keystore, specify this option with the value of `JKS`.
+To explicitly specify the generation of a PKCS12 keystore, specify this option with the value of `PKCS12`.
+{empty} +
+{empty} +
+A PKCS12 keystore has advantages over a JKS keystore.
+The PKCS12 keystore is more extensible, supports stronger cryptographic algorithms, and is widely adopted.
+Certificate authorities frequently issue certificates in the PKCS12 format.
+
+|--password=_password_
+|Specifies the keystore password, which must be at least six characters long. If this option is not specified, you’re prompted for a value when you run the command.
+
+|--passwordEncoding=_password_encoding_type_
+|Specifies how to encode the keystore password.
+Supported encoding types are `xor` and `aes`.
+If this option isn't specified, a default encoding type of `xor` is used.
+
+|--passwordKey=_password_encryption_key_
+|Specifies the key to use when you encode a password with AES encryption.
+This string is hashed to produce an encryption key that is used to encrypt and decrypt the password.
+You can provide the key by defining the `wlp.password.encryption.key` variable as the key value.
+If this option isn't specified, a default key is used.
+This option cannot be combined with `--passwordBase64Key` or `--aesConfigFile`.
+
+|--passwordBase64Key=<Key>
+|Specifies a Base64-encoded 256-bit AES key that is used to encrypt the generated keystore password. 
+This option cannot be combined with `--aesConfigFile` or `--passwordKey`.
+
+|--aesConfigFile=<File>
+|Specifies an XML or Java properties file that contains either the `wlp.password.encryption.key` or `wlp.aes.encryption.key` variable. 
+Only one variable can be present in a file. 
+This option cannot be combined with `--passwordBase64Key` or `--passwordKey`.
+
+|--server=_name_
+|Specifies the name of the Open Liberty server for which the keystore and certificate are created.
+This option can't be used if the `--client` option is specified. This option is required when the `--client` option is not specified.
+
+|--sigAlg=_signature_algorithm_
+|Specifies the signature algorithm that is used to sign the self-signed certificate.
+By default, the signature algorithm is SHA256withRSA.
+The signature algorithm that is supported depends on what is supported by the underlying Java Runtime Environment (JRE).
+Stronger signature algorithms might require the JRE to have an unrestricted policy file in place.
+{empty} +
+{empty} +
+The command accepts the following signature algorithms: SHA256withRSA, SHA1withRSA, SHA384withRSA, SHA512withRSA, SHA1withECDSA, SHA256withECDSA, SHA384withECDSA, and SHA512withECDSA.
+The signature algorithms that end with RSA create certificates with RSA keys.
+The signature algorithms that end with ECDSA create certificates with Elliptical Curve (EC) keys.
+{empty} +
+{empty} +
+If you use certificates that are created with EC keys, then include a customized ciphers list that includes EC ciphers in your Transport Layer Security (TLS) configuration.
+
+|--subject=_DN_
+|Specifies the distinguished name (DN) for the certificate subject and issuer.
+If this option isn't specified, a default value of `CN=<hostname>,OU=<server or client name>,O=ibm,C=us` is used.
+{empty} +
+{empty} +
+The DN value is retrieved by using a Java method to get the machine's local hostname.
+If the hostname can't be resolved, the IP address is returned.
+
+|--validity=_days_
+|Specifies the number of days that the certificate is valid, which must be equal to or greater than 365.
+If this option isn't specified, a default value of `365` is used.
+
+|===
+
+== Exit codes
+
+The following exit codes are available for the `securityUtility createSSLCertificate` command:
+
+.Exit codes for the securityUtility createSSLCertificate command
+[%header,cols="2,9"]
+|===
+
+|Code
+|Explanation
+
+|0
+|This code indicates successful completion of the requested operation.
+
+|1
+|This code indicates a generic error.
+
+|2
+|This code indicates that the server is not found.
+
+|3
+|This code indicates that the client is not found.
+
+|4
+|This code indicates that the path can not be created.
+
+|5
+|This code indicates that the file already exists.
+|===

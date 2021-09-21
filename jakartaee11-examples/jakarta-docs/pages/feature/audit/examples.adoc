@@ -1,0 +1,52 @@
+== Examples
+
+=== Manage audit log files
+
+The following example shows how to set the maximum file size to `100` MB and set the maximum number of archived audit log files to `50`. You can also set the `compact` attribute to `true` to print the entire audit record on one line within the audit log:
+
+[source,xml]
+----
+<auditFileHandler maxFiles="50" maxFileSize="100" compact=”true”>
+</auditFileHandler>
+----
+
+=== Configure the audit events to log
+
+To specify only the audit events and outcomes that might be relevant in an environment, the `events` element can be defined with the audit event name and outcome. The following example specifies audit events and outcomes in the `auditFileHandler` element:
+
+[source,xml]
+----
+<auditFileHandler maxFiles="5" maxFileSize="20" compact="true">
+    <events name="AuditEvent_1" eventName="SECURITY_AUTHN" outcome="SUCCESS"/>
+    <events name="AuditEvent_2" eventName="SECURITY_AUTHN" outcome="REDIRECT"/>
+    <events name="AuditEvent_3" eventName="SECURITY_AUTHN" outcome="FAILURE"/>
+    <events name="AuditEvent_4" eventName="SECURITY_AUTHZ"/>
+</auditFileHandler>
+----
+
+
+=== Encrypt and sign audit data
+
+The following example shows the audit file handler with encryption and signing enabled. The `encrypt` and `sign` attributes must be specified in the `auditFileHandler` element along with the alias names of the certificates and the keystores that contain the certificates. The `keystore` element contains the private or public key that is used to encrypt and sign the data:
+
+[source,xml]
+----
+<keyStore id="auditEncKeyStore” password="Liberty" location="server1/resources/security/AuditEncryptionKeyStore.jks" type="JKS" />
+
+<keyStore id="auditSignKeyStore" password="{aes}EzY9Oi0rJg==" location="server1/resources/security/AuditSigningKeyStore2.jks" type="JKS" />
+
+<auditFileHandler encrypt="true" encryptAlias="#auditencryption#" encryptKeyStoreRef="auditEncKeyStore" sign="true" signingAlias="auditsigning2" signingKeyStoreRef="auditSignKeyStore" />
+----
+
+=== Set the audit log format
+
+The JSON logging format makes it easier to manage log data by providing more structure to generated data. The following example shows how to configure the Audit feature to generate audit logs in the JSON logging format:
+
+[source,xml]
+----
+<logging messageFormat="json" messageSource="audit,message"/>
+----
+
+=== Send audit logs to the OpenTelemetry exporter
+
+When the Audit feature is enabled together with the feature:mptelemetry[display=MicroProfile Telemetry] feature, you can collect and send audit logs to your configured OpenTelemetry exporter. For more information, see link:/docs/latest/reference/feature/mpTelemetry-2.0.html#logs[MicroProfile Telemetry: Collect logs from a specified source].

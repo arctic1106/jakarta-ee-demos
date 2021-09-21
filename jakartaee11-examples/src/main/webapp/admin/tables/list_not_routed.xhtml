@@ -1,0 +1,47 @@
+<div id="id_list_compl_cargoes" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core">
+    <div class="section-heading">
+        <div>
+            <h2>Awaiting route</h2>
+            <p>Shipments that still need an itinerary.</p>
+        </div>
+    </div>
+
+    <h:dataTable var="cargoNotRouted" value="#{listCargo.notRoutedCargos}" style="text-align: center; width: 100%;" id="tableNotRouted">
+        <h:column>
+            <f:facet name="header">Tracking ID</f:facet>
+            <h:link id="trackingId" value="#{cargoNotRouted.trackingId.idString}" outcome="/admin/route.xhtml"
+                    style="text-decoration: none;" title="This cargo is not routed. Click on its tracking ID to route it!">
+                <f:param name="trackingId" value="#{cargoNotRouted.trackingId.idString}"/>
+            </h:link>
+        </h:column>
+
+        <h:column>
+            <f:facet name="header">Origin</f:facet>
+            <h:outputText value="#{cargoNotRouted.origin.name}  "/>
+            <br/>
+            <h:outputText value="#{cargoNotRouted.origin.unLoCode.code}" style="color: #999999;font-size:.8em;"/>
+        </h:column>
+
+        <h:column>
+            <f:facet name="header">Destination</f:facet>
+            <h:link outcome="/admin/dialogs/change_destination.xhtml" style="text-decoration: none;"
+                    title="Click to change cargo destination.">
+                <f:param name="trackingId" value="#{cargoNotRouted.trackingId.idString}"/>
+                <h:outputText value="#{cargoNotRouted.routeSpecification.destination.name}  "/>
+                <br/>
+                <h:outputText value="#{cargoNotRouted.routeSpecification.destination.unLoCode.code}" style="color: #999999;font-size:.8em;"/>
+                <span class="action-symbol" aria-hidden="true">✎</span>
+            </h:link>
+        </h:column>
+
+        <h:column>
+            <f:facet name="header">Deadline</f:facet>
+            <h:link outcome="/admin/dialogs/change_arrival_deadline.xhtml" style="text-decoration: none;"
+                    title="Click to change cargo arrival deadline.">
+                <f:param name="trackingId" value="#{cargoNotRouted.trackingId.idString}"/>
+                <h:outputText value="#{cargoNotRouted.routeSpecification.arrivalDeadline}  "/>
+                <span class="action-symbol" aria-hidden="true">✎</span>
+            </h:link>
+        </h:column>
+    </h:dataTable>
+</div>

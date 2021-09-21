@@ -1,0 +1,127 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="jakarta.faces.core"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets">
+    <h:panelGroup rendered="#{not empty cargoDetails.cargo}" layout="block">
+        <div class="cargo-details-header">
+            <span>Routing Details for Cargo #{cargoDetails.cargo.trackingId.idString}</span>
+        </div>
+        <hr/>
+
+        <h:panelGrid columns="2" styleClass="registrationPanelGrid" cellpadding="5">
+            <span class="cargo-detail-label">Origin:</span>
+            <h:panelGroup>
+                <h:outputText value="#{cargoDetails.cargo.origin.name}"/>
+                <h:outputText value="&#160;&#160;#{cargoDetails.cargo.origin.unLoCode.code}"
+                              styleClass="cargo-detail-code"/>
+            </h:panelGroup>
+
+            <span class="cargo-detail-label">Destination:</span>
+            <h:panelGroup>
+                <h:outputText value="#{cargoDetails.cargo.routeSpecification.destination.name}"/>
+                <h:outputText value="&#160;&#160;#{cargoDetails.cargo.routeSpecification.destination.unLoCode.code}"
+                              styleClass="cargo-detail-code"/>
+            </h:panelGroup>
+
+            <span class="cargo-detail-label">Arrival deadline:</span>
+            <h:outputText value="#{cargoDetails.cargo.routeSpecification.arrivalDeadline}"/>
+        </h:panelGrid>
+
+        <hr/>
+        <section class="panel">
+            <h:panelGroup rendered="#{not empty cargoDetails.cargo.itinerary.legs}">
+                <h:panelGroup rendered="#{cargoDetails.cargo.delivery.routingStatus == 'MISROUTED'}">
+                    <div class="cargo-misrouted">
+                        <span>Misrouted cargo!</span>
+                        <h:button value="Reroute" outcome="/admin/route.xhtml">
+                            <f:param name="trackingId" value="#{cargoDetails.cargo.trackingId.idString}"/>
+                        </h:button>
+                    </div>
+                </h:panelGroup>
+
+                <h2>Itinerary</h2>
+                <h:dataTable var="leg"
+                             value="#{cargoDetails.cargo.itinerary.legs}"
+                             styleClass="cargo-itinerary-table">
+                    <h:column>
+                        <f:facet name="header">Voyage</f:facet>
+                        <h:outputText value="#{leg.voyage.voyageNumber.idString}"/>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Load</f:facet>
+                        <h:outputText value="#{leg.loadLocation.name}"/>
+                        <br/>
+                        <h:outputText value="#{leg.loadLocation.unLoCode.code}" styleClass="cargo-detail-code"/>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Time</f:facet>
+                        <h:outputText value="#{leg.loadTime}">
+                            <f:convertDateTime pattern="M/d/yyyy HH:mm" type="localDateTime"/>
+                        </h:outputText>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Unload</f:facet>
+                        <h:outputText value="#{leg.unloadLocation.name}"/>
+                        <br/>
+                        <h:outputText value="#{leg.unloadLocation.unLoCode.code}" styleClass="cargo-detail-code"/>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Time</f:facet>
+                        <h:outputText value="#{leg.unloadTime}">
+                            <f:convertDateTime pattern="M/d/yyyy HH:mm" type="localDateTime"/>
+                        </h:outputText>
+                    </h:column>
+                </h:dataTable>
+            </h:panelGroup>
+
+            <h:panelGroup rendered="#{empty cargoDetails.cargo.itinerary.legs}">
+                <p>
+                    <strong>Not routed</strong> —
+                    <h:link value="route this cargo" outcome="/admin/route.xhtml">
+                        <f:param name="trackingId" value="#{cargoDetails.cargo.trackingId.idString}"/>
+                    </h:link>
+                </p>
+            </h:panelGroup>
+        </section>
+
+        <section class="panel">
+            <h2>Register Handling Event</h2>
+            <h:form id="stateForm">
+                <h:messages/>
+                <h:inputHidden value="#{cargoDetails.trackingId}"/>
+                <h:panelGrid columns="2" cellpadding="5">
+                    <h:outputLabel for="eventType" value="Event type:"/>
+                    <h:selectOneMenu id="eventType" value="#{cargoDetails.eventType}" required="true">
+                        <f:selectItems value="#{cargoDetails.eventTypes}"/>
+                    </h:selectOneMenu>
+
+                    <h:outputLabel for="location" value="Location:"/>
+                    <h:selectOneMenu id="location" value="#{cargoDetails.locationCode}" required="true">
+                        <f:selectItems value="#{cargoDetails.locations}"
+                                       var="loc"
+                                       itemLabel="#{loc.name}"
+                                       itemValue="#{loc.unLoCode.code}"/>
+                    </h:selectOneMenu>
+                </h:panelGrid>
+
+                <h:panelGrid columns="2" cellpadding="5">
+                    <h:outputLabel for="voyage"
+                                   value="Voyage number:"
+                                   rendered="#{cargoDetails.requiresVoyage}"/>
+                    <h:selectOneMenu id="voyage"
+                                     value="#{cargoDetails.voyageNumber}"
+                                     rendered="#{cargoDetails.requiresVoyage}">
+                        <f:selectItems value="#{cargoDetails.voyages}"
+                                       var="v"
+                                       itemLabel="#{v.voyageNumber.idString}"
+                                       itemValue="#{v.voyageNumber.idString}"/>
+                    </h:selectOneMenu>
+                </h:panelGrid>
+
+                <h:commandButton value="Submit" action="#{cargoDetails.submitStateChange}">
+                    <f:param name="trackingId" value="#{cargoDetails.trackingId}"/>
+                </h:commandButton>
+            </h:form>
+        </section>
+    </h:panelGroup>
+</ui:composition>

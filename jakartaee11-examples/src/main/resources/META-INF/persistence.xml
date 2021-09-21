@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence
+    xmlns="https://jakarta.ee/xml/ns/persistence"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.2"
+    xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_2.xsd">
+
+    <persistence-unit name="CargoTrackerUnit">
+        <jta-data-source>jdbc/CargoTrackerDatabase</jta-data-source>
+        <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
+        <!-- Bean Validation runs on pre-persist/pre-update (default AUTO). -->
+        <validation-mode>CALLBACK</validation-mode>
+        <properties>
+            <!-- Development only: rebuild the in-memory schema on every start. -->
+            <property name="jakarta.persistence.schema-generation.database.action" value="drop-and-create"/>
+            <!-- One row that SampleDataService locks pessimistically so that only one
+                 node seeds the database. -->
+            <property name="jakarta.persistence.sql-load-script-source" value="META-INF/initial-data.sql"/>
+            <!-- EclipseLink is Liberty's persistence provider. Raise to FINE to see SQL. -->
+            <property name="eclipselink.logging.level" value="INFO"/>
+            <property name="eclipselink.logging.level.sql" value="WARNING"/>
+        </properties>
+    </persistence-unit>
+</persistence>

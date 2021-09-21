@@ -1,0 +1,242 @@
+== Examples
+
+The Social Media Login feature provides a set of built-in configuration elements for popular social media providers, in addition to generic configuration elements.
+The following examples show how to configure different scenarios in the `server.xml` file.
+
+
+- <<#socialmediaid,Request login with a social media ID>>
+- <<#socialmediaproviders,Provide a choice of social media providers to the user>>
+- <<#authenticatedusers,Require authenticated users to also be present in the configured registry>>
+- <<#loginwithasocialmediaid,Request login with a social media ID or with their account for the configured registry>>
+- <<#loginforsubset,Request login with a social media ID for only a subset of applications, URLs, browsers, or IP addresses>>
+- <<#loginsasoptions,Provide other social media logins as options to the user>>
+- <<#signtoken,Accept signed tokens with signature algorithm validation>>
+- <<#privatekeyjwt,Use Private Key JWT for client authentication>>
+- <<#openshiftservice,Use OpenShift service accounts to authenticate and authorize protected resource requests>>
+- <<#activedirectory,Use Active Directory as an authentication provider>>
+
+
+[#socialmediaid]
+=== Request login with a social media ID
+
+If multiple social media providers are configured, a customizable selection form is presented.
+The user can then sign in with a social media provider of their choice.
+The following example shows how to configure your application to request that the user logs in with their Google ID.
+In this example, `your_app_id` and `your_app_secret` are the Google client ID and client secret credentials for the `formlogin` application.
+
+[source,xml]
+----
+<googleLogin clientId="your_app_id" clientSecret="your_app_secret"  />
+
+<!-- protected applications need to have a security constraint defined -->
+<application type="war" id="formlogin" name="formlogin" location="server1/apps/formlogin.war">
+    <application-bnd>
+        <security-role name="Employee">
+            <special-subject type="ALL_AUTHENTICATED_USERS" />
+        </security-role>
+    </application-bnd>
+</application>
+----
+
+[#socialmediaproviders]
+=== Provide a choice of social media providers to the user
+
+
+You can configure multiple social media providers for users to choose from.
+The user receives a customizable selection form before authentication with the available providers included on the form.
+The following example includes a choice of Google, GitHub, Facebook, LinkedIn, and Twitter.
+
+[source,xml]
+----
+<googleLogin clientId="your_app_id" clientSecret="your_app_secret"  />
+<githubLogin   clientid="your_app_id"          clientSecret="your_app_secret"  />
+<facebookLogin clientId="your_app_id"          clientSecret="your_app_secret"  />
+<linkedinLogin clientId="your_app_id"          clientSecret="your_app_secret"  />
+<twitterLogin  consumerKey="your_app_id"       consumerSecret="your_app_secret"/>
+
+<!-- protected applications need to have a security constraint defined -->
+<application type="war" id="formlogin" name="formlogin" location="server1/apps/formlogin.war">
+    <application-bnd>
+        <security-role name="Employee">
+            <special-subject type="ALL_AUTHENTICATED_USERS" />
+        </security-role>
+    </application-bnd>
+</application>
+----
+
+[#authenticatedusers]
+=== Require authenticated users to also be present in the configured registry
+
+
+You can restrict the presentation of a social media provider to only users who are also in another configured registry.
+For example, use the `mapToUserRegistry` attribute to configure your application.
+The user must authenticate through Google and also verify as an existing user in the company LDAP registry.
+
+[source,xml]
+----
+ <googleLogin  mapToUserRegistry="true" clientId="your app id"  clientSecret="your app secret"   />
+
+ <ldapRegistry ...> ... </ldapRegistry>
+
+----
+
+For more information on configuring an LDAP registry, see the feature:ldapRegistry[display=LDAP User Registry feature].
+
+[#loginwithasocialmediaid]
+=== Request login with a social media ID or with their account for the configured registry
+
+You can give users the option of logging in with either a social media provider or with their account on the configured registry.
+For example, use the `enableLocalAuthentication` attribute to configure your application so that users can log in with a Google ID or with their account on their company's LDAP registry.
+
+[source,xml]
+----
+<!-- The user is given a choice menu of either Google or LDAP -->
+<googleLogin  clientId="your app id"  clientSecret="your app secret" />
+
+<socialLoginWebapp enableLocalAuthentication="true">
+
+<ldapRegistry id="ldap" ...> ... </ldapRegistry>
+
+----
+
+[#loginforsubset]
+=== Request login with a social media ID for only a subset of applications, URLs, browsers, or IP addresses
+
+To protect only a subset of applications, URLs, or IP addresses, use an xref:ROOT:authentication-filters.adoc[authentication filter].
+The security configuration takes effect only when the conditions in the filter are met. For example,
+you might want a web application to be secured with the Social Media Login feature and a microservice application to be secured with the feature:mpJwt[display=MicroProfile JWT feature]. In the following example, only requests that contain the `/mywebapp` URL pattern are secured with Google credentials.
+
+
+// tag::authfilter[]
+[source,xml]
+----
+
+<googleLogin  authFilterRef="authFilter1" clientId="your app id"  clientSecret="your app secret" />
+
+<authFilter id="authFilter1">
+    <requestUrl
+        id="myUrlFilter"
+        urlPattern="/mywebapp"
+        matchType="contains" />
+</authFilter>
+----
+// end::authfilter[]
+
+For more information, see the config:authFilter[display=authFilter element].
+
+[#loginsasoptions]
+=== Provide other social media logins as options to the user
+
+To authenticate with a social media provider that isn't preconfigured with Open Liberty, use the config:oauth2Login[display=oauth2Login element] for OAuth providers or the config:oidcLogin[display=oidcLogin element] for OpenID Connect providers.
+These elements supply the configuration details that are needed to work with the provider.
+The details can usually be obtained from the developer instructions of the social media provider.
+The following example configures Instagram as the social media provider.
+
+[source,xml]
+----
+<oauth2Login id="instagramLogin" clientId="client_id" clientSecret="client_secret"
+    scope="basic public_content"   responseType="code"
+    tokenEndpointAuthMethod="client_secret_post"
+    authorizationEndpoint="https://api.instagram.com/oauth/authorize"
+    tokenEndpoint="https://api.instagram.com/oauth/access_token"
+    userApi="https://api.instagram.com/v1/users/self"
+    userNameAttribute="username"
+    website="https://www.instagram.com/developer/authentication/">
+</oauth2Login>
+----
+
+[#signtoken]
+=== Accept signed tokens with signature algorithm validation
+OpenID Connect clients that are configured by using the `oidcLogin` element in the Social Media Login feature support signature algorithm validation for signed tokens. The process for configuring signature algorithm validation in the Social Media Login feature is identical to the feature:openidConnectClient[display=OpenID Connect Client] feature.
+
+The following example shows an `oidcLogin` configuration that accepts only tokens signed with `RS256`:
+
+[source,xml]
+----
+<oidcLogin
+    id="myOidcLogin"
+    clientId="client01"
+    clientSecret="{xor}LDo8LTor"
+    signatureAlgorithm="RS256"
+    jwksUri="https://example.com/jwtserver/jwk"
+    ...
+/>
+----
+
+The following example shows an `oidcLogin` configuration that selects the signature algorithm from the token header and accepts tokens signed with either `RS256`, `ES384`, or `HS512`:
+
+[source,xml]
+----
+<oidcLogin
+    id="myOidcLogin"
+    clientId="client01"
+    clientSecret="{xor}LDo8LTor"
+    signatureAlgorithm="FROM_HEADER"
+    allowedSignatureAlgorithms="RS256, ES384, HS512"
+    jwksUri="https://example.com/jwtserver/jwk"
+    ...
+/>
+----
+
+[#privatekeyjwt]
+=== Use Private Key JWT for client authentication
+
+OpenID Connect clients that are configured by using the `oidcLogin` element in the Social Media Login feature support the `private_key_jwt` client authentication method with OpenID Connect token endpoints. The process for enabling this support in the Social Media Login feature is identical to the feature:openidConnectClient[display=OpenID Connect Client] feature.
+
+The following example shows how to use a private key JWT for client authentication.
+
+[source,xml]
+----
+<oidcLogin id="myOidcClientUsingPrivateKeyJwt"
+    tokenEndpointAuthMethod="private_key_jwt"
+    tokenEndpointAuthSigningAlgorithm="E512"
+    keyAliasName="privatekeyaliasES512"
+    ...
+/>
+----
+
+[#openshiftservice]
+=== Use OpenShift service accounts to authenticate and authorize protected resource requests
+
+You can configure the Social Media Login feature to use OpenShift service accounts to authenticate and authorize protected resource requests.
+With this configuration, you can secure endpoints that might produce sensitive information, such as monitoring and metrics endpoints.
+
+The service accounts can authenticate themselves by providing a service account token that was created within the OpenShift cluster in the request.
+
+The following `server.xml` file example shows how to configure the Social Media Login feature to use OpenShift service accounts as a single sign-on provider.
+
+[source,xml]
+----
+<okdServiceLogin />
+----
+
+When the Liberty runtime is packaged and deployed within an OpenShift cluster, The minimum configuration requires only an config:okdServiceLogin[] element.
+
+The `okdServiceLogin` element authenticates all protected resource requests received by Open Liberty.
+
+Incoming requests to protected resources must include a service account token. The token must be specified as a bearer token in the `Authorization` header of the request. The Liberty runtime uses the service account token to query information about the associated service account from the OpenShift cluster. The OpenShift project that is associated with the service account is used as the group for the service account for authorization decisions. Similarly, the name of the service account is used as the username.
+
+If the Liberty runtime is not deployed within an OpenShift cluster, configure the `userValidationApi` attribute to the value for the appropriate User API endpoint in the OpenShift cluster:
+
+[source,xml]
+----
+<okdServiceLogin userValidationApi="https://cluster.domain.example.com/apis/user.openshift.io/v1/users/~" />
+----
+
+You can configure multiple `okdServiceLogin` elements  as long as each element specifies a unique `id` attribute. In those cases, configure xref:ROOT:authentication-filters.adoc[authentication filters] to ensure the appropriate endpoints are protected by a unique `okdServiceLogin` instance.
+
+[#activedirectory]
+=== Use Active Directory as an authentication provider
+
+You can configure an Open Liberty server to use Active Directory as an authentication provider for protected resources. The `oidcLogin` element configures a social login by using the OpenID Connect protocol. With OpenID Connect, the discovery endpoint URL provides the information that the client needs to interact with the authentication provider, which in this case is Active Directory. In the following example, the `discoveryEndpoint` attribute specifies the endpoint URL for Active Directory.
+[source,xml]
+----
+<oidcLogin
+    id="liberty-aad-oidc-javaeecafe" clientId="1m2a72a8-Yh32-T56W-95Pq-aFNu78491272"
+    clientSecret="RaWhKDUcDpngeKCuG14yM6extsMcPXqdUCjYN="
+    discoveryEndpoint="https://login.microsoftonline.com/organizations/v2.0/.well-known/openid-configuration"
+    signatureAlgorithm="RS256"
+    userNameAttribute="preferred_username" />
+----
+
+For more information about Active Directory endpoints, see the link:https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-protocols#endpoints[Active Directory documentation].

@@ -1,0 +1,106 @@
+== Examples
+
+=== Enable OpenTelemetry
+
+To enable OpenTelemetry for Open Liberty, in addition to enabling the MicroProfile Telemetry feature, you must also set the `otel.sdk.disabled=false` system property in one of the valid configuration sources. Depending on your application scenario, you can set this property at the runtime level or the application level. For more information, see xref:ROOT:microprofile-telemetry.adoc#global[Collecting and exporting logs, metrics, and traces with OpenTelemetry].
+
+The following example demonstrates how to enable OpenTelemetry at the runtime level by setting the property in your `bootstrap.properties` file:
+
+----
+otel.sdk.disabled=false
+----
+
+When you enable the MicroProfile Telemetry feature and set this property, your system is ready to collect and export logs, metrics, and traces. By default, all OpenTelemetry data is exported by using the OpenTelemetry Protocol (OTLP) at the `\http://localhost:4317` endpoint. You can configure alternative exporter settings by specifying system properties or environment variables. For more information, see xref:ROOT:microprofile-telemetry.adoc#config[OpenTelemetry settings and configuration].
+
+[#logs]
+=== Collect logs from a specified source
+
+To enable the MicroProfile Telemetry feature to collect logs from different sources in the Open Liberty runtime environment, configure the `source` attribute for the config:mpTelemetry[] element with a comma-separated list of log sources.
+
+[source,xml]
+----
+<mpTelemetry source="message, trace, ffdc, accesslog"/>
+----
+
+* The `mpTelemetry` configuration element is optional. If you do not specify it or the `source` attribute, the default configuration source is `message`.
+
+* If the source attribute is empty (`source=“”`), no sources are collected, and nothing is routed to the configured OpenTelemetry logs exporter.
+
+* The attributes and values are case insensitive.
+
+To enable OpenTelemtry to collect access log events, configure access logging in the server configuration and the `accessLog` source in the source list, as shown in the following example:
+
+[source,xml]
+----
+<httpAccessLogging id="accessLogging" logFormat='%h %u %{t}W "%r" %s %b %D %{R}W'/>
+<httpEndpoint id="defaultHttpEndpoint" accessLoggingRef="accessLogging" httpPort="9080" httpsPort="9443"/>
+
+<mpTelemetry accessLogFields="logFormat" source="message,trace,ffdc,accessLog"/>
+----
+
+The Open Liberty feature:audit[display=Audit] feature captures security-related events from the runtime environment and emits human-readable audit records.
+To collect and send audit logs to your configured OpenTelemetry exporter, add either the `audit-1.0` or `audit-2.0` feature and specify the `audit` log source, as shown in the following example:
+
+[source,xml]
+----
+<featureManager>
+   <feature>audit-2.0</feature>
+   <feature>mpTelemetry-2.0</feature>
+</featureManager>
+
+<mpTelemetry source="audit"/>
+----
+
+You can configure different audit events that are captured and routed to OpenTelemetry by specifying the relevant audit events and outcomes in the config:auditFileHandler[] element. For more information, see link:/docs/latest/reference/feature/audit-2.0.html#_configure_the_audit_events_to_log[Configure the audit events to log] in the Audit feature documentation.
+
+[#dev]
+=== Customize your application telemetry with the OpenTelemetry API
+
+Although OpenTelemetry automatically collects a default set of logs, metrics, and traces, if you need to xref:ROOT:telemetry-trace.adoc[manually instrument your code to collect traces] or xref:ROOT:custom-mptelemetry-metrics.adoc[define custom metrics], you must make the OpenTelemetry API visible in your development environment.
+
+xref:ROOT:class-loader-library-config.adoc#3rd-party[Enable third-party APIs] for your application by adding the following code in your `server.xml` file:
+
+[source,xml]
+----
+<webApplication id="app-name" location="app-name.war">
+    <classloader apiTypeVisibility="+third-party"/>
+</webApplication>
+----
+
+=== Use MicroProfile Telemetry 2.0 with Java SE 8
+
+Unlike previous versions of MicroProfile Telemetry, version 2.0 supports Java SE 8 in certain configurations.
+
+MicroProfile Telemetry 2.0 (`mpTelemetry-2.0`) is included in the feature:microProfile-7.0[display=MicroProfile 7.0 umbrella feature] and xref:reference:platform/MicroProfile.adoc[platform], which do not support Java SE 8. However, MicroProfile Telemetry 2.0 is compatible with the following earlier versions of MicroProfile that do support Java SE 8:
+
+- feature:microProfile-5.0[display=MicroProfile 5.0]
+- feature:microProfile-4.1[display=MicroProfile 4.1]
+- feature:microProfile-1.4[display=MicroProfile 1.4]
+
+Although `mpTelemetry-2.0` is not automatically enabled by these umbrella features, if you independently enable it alongside any of them, the configuration supports Java SE 8.
+
+For example, the following `featureManager` configuration in your `server.xml` file enables `mpTelemetry-2.0` in a Java SE 8 environment:
+
+[source.xml]
+----
+<featureManager>
+  <feature>microProfile-5.0</feature>
+  <feature>mpTelemetry-2.0</feature>
+  ...
+</featureManager>
+----
+
+Alternatively, if you are using xref:reference:feature/versionless-features.adoc[versionless features], you must likewise independently enable the versioned `mpTelemetry-2.0` feature, along with your chosen platform feature, if you want to use it with Java SE 8. The following example shows the `microProfile-5.0` platform feature and several example versionless features enabled together with `mpTelemetry-2.0`:
+
+[source.xml]
+----
+<featureManager>
+  <platform>microProfile-5.0</platform>
+  <feature>mpTelemetry-2.0</feature>
+  <feature>mpHealth</feature>
+  <feature>mpMetrics</feature>
+  ...
+</featureManager>
+----
+
+In this example, the versionless `mpHealth` and `mpMetrics` features are automatically resolved to compatible versions by the `microProfile-5.0` platform. The versioned `mpTelemetry-2.0` feature gets the benefit of Java SE 8 support that the platform provides.

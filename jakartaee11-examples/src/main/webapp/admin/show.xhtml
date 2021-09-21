@@ -1,0 +1,35 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="jakarta.faces.core"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets">
+<ui:composition template="/WEB-INF/templates/common/admin.xhtml">
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="trackingId" value="#{cargoDetails.trackingId}" required="true"/>
+            <f:viewAction action="#{cargoDetails.load}"/>
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">Cargo Details</ui:define>
+
+    <ui:define name="content">
+        <div class="ui-grid-col-6">
+            <ui:include src="/WEB-INF/fragments/cargo-details.xhtml"/>
+            <section class="panel">
+                <h2>Audit trail</h2>
+                <p>Committed status changes, written by a CDI transactional observer to a
+                    Jakarta Data record entity.</p>
+                <h:dataTable value="#{cargoDetails.auditTrail}" var="entry" styleClass="cargo-itinerary-table"
+                             rendered="#{not empty cargoDetails.auditTrail}">
+                    <h:column><f:facet name="header">Recorded</f:facet>#{entry.recordedAt()}</h:column>
+                    <h:column><f:facet name="header">Transport</f:facet>#{entry.transportStatus()}</h:column>
+                    <h:column><f:facet name="header">Routing</f:facet>#{entry.routingStatus()}</h:column>
+                    <h:column><f:facet name="header">Location</f:facet>#{entry.lastKnownLocation()}</h:column>
+                    <h:column><f:facet name="header">Misdirected</f:facet>#{entry.misdirected() ? 'yes' : 'no'}</h:column>
+                </h:dataTable>
+                <h:outputText value="No changes recorded since startup." rendered="#{empty cargoDetails.auditTrail}"/>
+            </section>
+        </div>
+    </ui:define>
+</ui:composition>
+</html>

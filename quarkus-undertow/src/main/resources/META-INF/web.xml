@@ -1,0 +1,14 @@
+<web-app>
+
+    <servlet>
+        <servlet-name>myServlet</servlet-name>
+        <servlet-class>org.acme.servlet.DemoServ</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>myServlet</servlet-name>
+        <url-pattern>/welcome</url-pattern>
+    </servlet-mapping>
+
+
+</web-app>

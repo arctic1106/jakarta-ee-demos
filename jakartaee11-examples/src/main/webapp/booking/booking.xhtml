@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core" xmlns:ui="jakarta.faces.facelets">
+<ui:composition template="/WEB-INF/templates/common/admin.xhtml">
+    <ui:define name="title">Cargo Registration</ui:define>
+    <ui:define name="content">
+        <div class="content-narrow" id="mainCol">
+            <div class="page-intro">
+                <p class="page-kicker">Step 1 of 3</p>
+                <h2>Choose the origin</h2>
+                <p>Start a new cargo booking by selecting its departure location.</p>
+            </div>
+            <h:form id="container">
+                <h:outputLabel for="origin" value="Origin location"/>
+                <br/>
+                <h:selectOneMenu id="origin" value="#{booking.originUnlocode}"
+                                 required="true" requiredMessage="Select an origin location.">
+                    <f:selectItem itemLabel="Select an origin" itemValue="" noSelectionOption="true"/>
+                    <f:selectItems value="#{booking.locations}" var="loc" itemLabel="#{loc.name}" itemValue="#{loc.unLoCode.code}"/>
+                </h:selectOneMenu>
+                <hr/>
+                <h:panelGrid columns="2" style="margin: 0 auto;">
+                    <h:commandButton value="Cancel" action="returnFromBookingFlow" immediate="true"/>
+                    <h:commandButton value="Next" action="booking-destination"/>
+                </h:panelGrid>
+            </h:form>
+        </div>
+    </ui:define>
+</ui:composition>
+</html>

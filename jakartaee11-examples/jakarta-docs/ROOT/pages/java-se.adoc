@@ -1,0 +1,101 @@
+// Copyright (c) 2018,2023 IBM Corporation and others.
+// Licensed under Creative Commons Attribution-NoDerivatives
+// 4.0 International (CC BY-ND 4.0)
+//   https://creativecommons.org/licenses/by-nd/4.0/
+//
+// Contributors:
+//     IBM Corporation
+//
+:page-layout: general-reference
+:page-type: general
+
+
+= Java SE support
+
+Open Liberty requires a Java SE runtime.
+It can run by using either a Java Runtime Environment (JRE) or a Java SE Development Kit (JDK) distribution.
+
+Open Liberty runs on any of the Java SE versions that are listed in the *Java SE version* column of the <<#supported,Supported Java Releases>> table.
+Always run Open Liberty on the most recent service release of your chosen Java version.
+A new version of Java SE is released every six months.
+Unless the prior version is designated as a Long Term Support (LTS) release, it no longer receives service updates for function and security after the new version is released.
+Whenever a non-LTS release is replaced by the next version, the Open Liberty project no longer validates the runtime against the older version.
+
+== Choosing a JVM
+
+Regardless of which Java SE Version you use, two Java virtual machine (JVM) implementations are available: https://www.eclipse.org/openj9/[Eclipse OpenJ9] and https://openjdk.java.net/groups/hotspot/[HotSpot], each of which is packaged in different Java distributions. These JVMs provide similar throughput performance, but make different tradeoffs for memory footprint and startup.
+As a result, Open Liberty recommends using a Java distribution that packages Eclipse OpenJ9 because it has a faster start time and uses less memory.
+The main Java distribution that uses Eclipse OpenJ9 is https://developer.ibm.com/languages/java/semeru-runtimes/[IBM Semeru].
+IBM Semeru provides uncertified Open Edition releases under a GPLv2 license with classpath exception, and Certified Edition releases under an IBM license.
+
+[#supported]
+== Supported Java SE releases
+
+The following table lists the Java SE versions that Open Liberty supports and provides links for downloads and migration guides.
+
+.Supported Java Releases
+[%header,cols=6]
+|===
+|Java SE version
+|LTS Release
+|End of Open Liberty support
+|Eclipse OpenJ9 Download
+|HotSpot Download
+|Migration Advice
+
+|8
+|Yes
+|29.0.0.1
+|https://developer.ibm.com/languages/java/semeru-runtimes/downloads/?version=8[IBM Semeru 8]
+|https://adoptium.net/?variant=openjdk8&jvmVariant=hotspot[Eclipse Temurin 8]
+|
+
+|11
+|Yes
+|27.0.0.10
+|https://developer.ibm.com/languages/java/semeru-runtimes/downloads/?version=11[IBM Semeru 11]
+|https://adoptium.net/?variant=openjdk11&jvmVariant=hotspot[Eclipse Temurin 11]
+|https://docs.oracle.com/en/java/javase/11/migrate/index.html#JSMIG-GUID-C25E2B1D-6C24-4403-8540-CFEA875B994A[Java SE 11 migration guide]
+
+|17
+|Yes
+|27.0.0.10
+|https://developer.ibm.com/languages/java/semeru-runtimes/downloads/?version=17[IBM Semeru 17]
+|https://adoptium.net/?variant=openjdk17&jvmVariant=hotspot[Eclipse Temurin 17]
+|https://docs.oracle.com/en/java/javase/17/migrate/toc.htm[Java SE 17 migration guide]
+
+
+|21
+|Yes
+|29.0.0.10
+|https://developer.ibm.com/languages/java/semeru-runtimes/downloads/?version=21[IBM Semeru 21]
+|https://adoptium.net/temurin/releases/?version=21[Eclipse Temurin 21]
+|https://docs.oracle.com/en/java/javase/21/migrate/toc.htm[Java SE 21 migration guide]
+
+|25
+|Yes
+|TBD
+|https://developer.ibm.com/languages/java/semeru-runtimes/downloads/?version=25[IBM Semeru 25]
+|https://adoptium.net/temurin/releases/?version=25[Eclipse Temurin 25]
+|https://docs.oracle.com/en/java/javase/25/migrate/getting-started.html[Java SE 25 migration guide]
+
+|26
+|No
+|TBD
+|https://developer.ibm.com/languages/java/semeru-runtimes/downloads/?version=26[IBM Semeru 26]
+|https://adoptium.net/temurin/releases/?version=26[Eclipse Temurin 26]
+|https://docs.oracle.com/en/java/javase/26/migrate/getting-started.html[Java SE 26 migration guide]
+|===
+
+
+== Migration tools
+
+In addition to the Java migration guides, tools are available that can provide migration advice that is targeted to your applications.
+The https://www.ibm.com/support/pages/node/6250913[Migration Toolkit for Application Binaries] can scan a JAR, WAR or EAR file and provide advice on migrating to new Java SE versions.
+After you https://www.ibm.com/support/pages/node/6250913[download] and install the tool, you can run it with the following command:
+
+```
+java -jar binaryAppScanner.jar myapp.war --analyze --sourceJava=ibm8 --targetJava=java11
+```
+
+Plug-ins that run a similar analysis on your application are available from Eclipse in the https://marketplace.eclipse.org/content/ibm-websphere-application-server-migration-toolkit-was-liberty[Eclipse marketplace].

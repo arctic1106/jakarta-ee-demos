@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets">
+
+<h:head>
+    <title><ui:insert name="title">Cargo Tracker</ui:insert> · Cargo Tracker</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b1728" />
+    <h:outputStylesheet name="css/app.css" />
+</h:head>
+
+<h:body>
+    <div class="app-shell">
+        <aside class="app-sidebar">
+            <a class="app-brand" href="#{request.contextPath}/">
+                <h:graphicImage value="#{resource['images/CTlogobadge128.png']}" alt="" />
+                <span class="app-brand-copy">
+                    <strong>Cargo Tracker</strong>
+                    <small>Customer portal</small>
+                </span>
+            </a>
+            <p class="app-nav-label">Explore</p>
+            <nav aria-label="Public navigation">
+                <ul id="side-sub-menu" class="app-nav">
+                    <li><a href="#{request.contextPath}/public/track.xhtml">Track cargo</a></li>
+                    <li><a href="#{request.contextPath}/public/about.xhtml">About tracking</a></li>
+                </ul>
+            </nav>
+            <div class="app-sidebar-footer">No account required</div>
+        </aside>
+
+        <main class="app-main">
+            <header class="app-topbar">
+                <div>
+                    <span class="app-topbar-kicker">Customer portal</span>
+                    <h1 class="app-topbar-title"><ui:insert name="title">Cargo Tracker</ui:insert></h1>
+                </div>
+                <a href="#{request.contextPath}/" class="app-home-link">Home</a>
+            </header>
+            <section class="app-content">
+                <ui:insert name="content">Default Content</ui:insert>
+            </section>
+        </main>
+    </div>
+    <h:outputScript name="js/topbar.min.js"/>
+    <h:outputScript name="js/progress.js"/>
+</h:body>
+</html>

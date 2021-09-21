@@ -1,0 +1,49 @@
+//
+// Copyright (c) 2020 IBM Corporation and others.
+// Licensed under Creative Commons Attribution-NoDerivatives
+// 4.0 International (CC BY-ND 4.0)
+//   https://creativecommons.org/licenses/by-nd/4.0/
+//
+// Contributors:
+//     IBM Corporation
+//
+:page-layout: server-command
+:page-type: command
+
+= server help command
+
+The `server help` command displays information about the `server` command, with details about its actions and options.
+
+
+== Usage examples
+
+Display help information for the `server` command:
+
+[source,sh]
+----
+server help
+----
+
+Display help information for the `create` action:
+
+[source,sh]
+----
+server help create
+----
+
+== Syntax
+
+Run the command from the `_path_to_liberty_/wlp/bin` directory.
+
+[subs=+quotes]
+----
+server help _actionName_
+----
+
+actionName::
+The name of the `server` command action that you want information about.
+
+== See also
+
+* xref:command/server-list.adoc[server list]
+* xref:command/server-version.adoc[server version]

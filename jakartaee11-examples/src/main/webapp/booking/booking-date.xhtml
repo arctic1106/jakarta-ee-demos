@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:pt="jakarta.faces.passthrough">
+
+<ui:composition template="/WEB-INF/templates/common/admin.xhtml">
+    <ui:define name="title">Cargo Registration</ui:define>
+    <ui:define name="content">
+        <div class="content-narrow" id="mainCol">
+            <div class="page-intro">
+                <p class="page-kicker">Step 3 of 3</p>
+                <h2>Set the arrival deadline</h2>
+                <p>Complete the #{booking.originName}–#{booking.destinationName} booking.</p>
+            </div>
+            <h:form id="dateForm">
+                <h:outputLabel for="deadline" value="Arrival deadline"/>
+                <h:panelGrid columns="1" styleClass="registrationPanelGrid" style="margin: 0 auto;">
+                    <h:inputText id="deadline" value="#{booking.arrivalDeadline}" pt:type="date" required="true">
+                        <f:convertDateTime pattern="yyyy-MM-dd" type="localDate"/>
+                        <f:ajax event="change" listener="#{booking.deadlineUpdated}" render="durationPanel bookBtn"/>
+                    </h:inputText>
+                </h:panelGrid>
+                <h:panelGrid columns="1" id="durationPanel" styleClass="registrationPanelGrid" style="margin: 0 auto;">
+                    <h:outputLabel value="A journey can't start and end the same day!" rendered="#{booking.duration eq 0}"/>
+                    <h:outputLabel value="Journey duration is one day." rendered="#{booking.duration eq 1}"/>
+                    <h:outputLabel value="Journey duration is #{booking.duration} days." rendered="#{booking.duration gt 1}"/>
+                </h:panelGrid>
+                <hr/>
+                <h:panelGrid columns="3" styleClass="registrationPanelGrid" style="margin: 0 auto;">
+                    <h:commandButton value="Back" action="booking-destination"/>
+                    <h:commandButton value="Cancel" action="returnFromBookingFlow" immediate="true"/>
+                    <h:commandButton value="Book Cargo" id="bookBtn" action="#{booking.register()}" disabled="#{!booking.bookable}"/>
+                </h:panelGrid>
+            </h:form>
+        </div>
+    </ui:define>
+</ui:composition>
+</html>

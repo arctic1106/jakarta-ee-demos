@@ -1,0 +1,224 @@
+:root {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #f8fafc;
+    background: #07111f;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    min-height: 100%;
+    margin: 0;
+}
+
+body {
+    background:
+        linear-gradient(90deg, rgba(7, 17, 31, 0.98) 0%, rgba(7, 17, 31, 0.91) 50%, rgba(7, 17, 31, 0.62) 100%),
+        url("#{resource['images/cargoTug.jpg']}") center/cover fixed;
+}
+
+.landing {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(18rem, 0.5fr);
+    min-height: 100vh;
+    overflow: hidden;
+    position: relative;
+}
+
+.landing-glow {
+    background: #f59e0b;
+    border-radius: 50%;
+    filter: blur(110px);
+    height: 22rem;
+    left: -11rem;
+    opacity: 0.17;
+    position: absolute;
+    top: -12rem;
+    width: 22rem;
+}
+
+.landing-hero {
+    align-self: center;
+    max-width: 66rem;
+    padding: clamp(2rem, 7vw, 7rem);
+    position: relative;
+    z-index: 1;
+}
+
+.landing-brand {
+    align-items: center;
+    color: #fff;
+    display: inline-flex;
+    font-size: 0.9rem;
+    font-weight: 800;
+    gap: 0.75rem;
+    margin-bottom: clamp(3rem, 8vh, 6rem);
+    text-decoration: none;
+}
+
+.landing-brand img {
+    height: 2.75rem;
+    width: 2.75rem;
+}
+
+.landing-kicker {
+    color: #fbbf24;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    margin: 0 0 1rem;
+    text-transform: uppercase;
+}
+
+.landing h1 {
+    font-size: clamp(2.9rem, 6.5vw, 6.5rem);
+    letter-spacing: -0.055em;
+    line-height: 0.98;
+    margin: 0;
+    max-width: 15ch;
+}
+
+.landing h1 span {
+    color: #fbbf24;
+}
+
+.landing-lead {
+    color: #c3cfde;
+    font-size: clamp(1rem, 1.5vw, 1.2rem);
+    line-height: 1.7;
+    margin: 2rem 0;
+    max-width: 48rem;
+}
+
+.landing-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.landing-button {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.7rem;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 800;
+    padding: 0.8rem 1.15rem;
+    text-decoration: none;
+    transition: transform 150ms ease, background-color 150ms ease;
+}
+
+.landing-button:hover {
+    background: rgba(255, 255, 255, 0.09);
+    transform: translateY(-2px);
+}
+
+.landing-button-primary {
+    background: #f59e0b;
+    border-color: #f59e0b;
+    color: #101828;
+}
+
+.landing-button-primary:hover {
+    background: #fbbf24;
+}
+
+.landing-features {
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: clamp(3rem, 8vh, 6rem);
+    max-width: 58rem;
+    padding-top: 1.5rem;
+}
+
+.landing-features article {
+    display: grid;
+    gap: 0.25rem;
+}
+
+.landing-features strong {
+    color: #fff;
+    font-size: 0.88rem;
+}
+
+.landing-features span {
+    color: #8fa1b8;
+    font-size: 0.76rem;
+}
+
+.landing-rail {
+    align-items: flex-end;
+    background: rgba(255, 255, 255, 0.035);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    padding: clamp(1.5rem, 4vw, 3rem);
+}
+
+.landing-rail-card {
+    backdrop-filter: blur(18px);
+    background: rgba(11, 23, 40, 0.76);
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    border-radius: 1rem;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+    padding: 1.5rem;
+    width: 100%;
+}
+
+.landing-rail-card h2 {
+    font-size: 1.45rem;
+    margin: 1.4rem 0 0.5rem;
+}
+
+.landing-rail-card p {
+    color: #a9b8ca;
+    line-height: 1.6;
+}
+
+.landing-rail-card a {
+    color: #fbbf24;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.landing-status {
+    align-items: center;
+    color: #c8d4e3;
+    display: inline-flex;
+    font-size: 0.76rem;
+    font-weight: 700;
+    gap: 0.45rem;
+}
+
+.landing-status i {
+    background: #34d399;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.12);
+    height: 0.5rem;
+    width: 0.5rem;
+}
+
+@media (max-width: 900px) {
+    .landing {
+        display: block;
+    }
+
+    .landing-hero {
+        padding-bottom: 2rem;
+    }
+
+    .landing-rail {
+        border-left: 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+}
+
+@media (max-width: 620px) {
+    .landing-features {
+        grid-template-columns: 1fr;
+    }
+
+    .landing-brand {
+        margin-bottom: 3rem;
+    }
+}

@@ -1,0 +1,62 @@
+== Examples
+
+=== Configure Logstash collector
+
+To configure the Logstash collector feature, you must specify the hostname and port number of a Logstash server and the ID of your SSL configuration. The following example shows how to configure the Logstash Collector feature to collect data from the default source, which is the `message` source:
+
+[source,xml]
+----
+<logstashCollector
+    hostName="localhost"
+    port="5043"
+    sslRef="mySSLConfig"/>
+----
+
+
+=== Set message and event parameters
+
+With the Logstash Collector feature, you can change the maximum number of characters that are allowed for the message field in a message, trace, or FFDC event. You can also limit the number of events that are sent per second for each event type that is specified with the `source` attribute in the following example:
+
+[source,xml]
+----
+<logstashCollector
+    source="message,trace,garbageCollection,ffdc,accessLog,audit"
+    hostName="localhost"
+    port="5043"
+    sslRef="mySSLConfig"
+    maxEvents="10"
+    maxFieldLength="3000"/>
+----
+
+The `maxFieldLength` parameter is set to 3000 characters and the `maxEvents` parameter is set to 10 events per second for each event type. For more information, see xref:ROOT:forwarding-logs-logstash.adoc[Forwarding logs and events to Logstash with Logstash collector].
+
+=== Add custom event tags
+
+The following example sets two `tag` elements to add custom tags that are associated with the events from various sources. The tags annotate the events to show that they come from `serverRackA5` and `billingAppTeam` systems:
+
+[source,xml]
+----
+<logstashCollector
+    hostName="localhost"
+    port="5043"
+    sslRef="mySSLConfig"
+    <tag>serverRackA5</tag>
+    <tag>billingAppTeam</tag>
+</logstashCollector>
+----
+
+=== Replace default HTTP access log fields
+
+The following example shows a configuration to replace the default HTTP access log fields with a different set of fields:
+
+[source,xml]
+----
+<httpEndpoint httpPort="9080" httpsPort="9443" id="defaultHttpEndpoint">
+    <accessLogging logFormat='%R{W} %u %{my_cookie}C %s'/>
+</httpEndpoint>
+<logstashCollector
+    source="accessLog"
+    jsonAccessLogFields="logFormat"/>
+----
+
+The `logFormat` attribute in the embedded `accessLogging` element specifies the log format options for the different set of fields, which are listed in xref:ROOT:access-logging.adoc[HTTP access logging]. The `jsonAccessLogFields` attribute is set to `logformat` to enable the logstash collector to use the set of access log fields that match the log format options.

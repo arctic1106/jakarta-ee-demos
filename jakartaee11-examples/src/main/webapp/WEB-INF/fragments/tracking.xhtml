@@ -1,0 +1,113 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="jakarta.faces.core"
+                xmlns:h="jakarta.faces.html"
+                xmlns:p="jakarta.faces.passthrough"
+                xmlns:ui="jakarta.faces.facelets">
+    <div class="panel tracking-search">
+        <h:form id="trackingForm">
+            <div class="tracking-search-fields">
+                <h:outputLabel for="trackingIdInput" value="Tracking ID"/>
+                <h:inputText id="trackingIdInput"
+                             value="#{track.trackingId}"
+                             required="true"
+                             p:placeholder="ABC123"
+                             p:title="Valid tracking ID"/>
+                <h:commandButton value="Track" action="#{track.onTrackById}">
+                    <f:ajax execute="@form" render="cargo-status" onevent="handleTracking"/>
+                </h:commandButton>
+            </div>
+
+            <div class="tracking-id-choices">
+                <span class="tracking-id-choices-label">Available tracking IDs</span>
+                <div class="tracking-id-list">
+                    <ui:repeat value="#{track.trackingIds}" var="availableTrackingId">
+                        <h:commandLink value="#{availableTrackingId}"
+                                       action="#{track.onTrackById(availableTrackingId)}"
+                                       styleClass="tracking-id-chip#{availableTrackingId == track.trackingId ? ' tracking-id-chip-active' : ''}"
+                                       title="Track cargo #{availableTrackingId}">
+                            <f:ajax execute="@this"
+                                    render="@form cargo-status"
+                                    onevent="handleTracking"/>
+                        </h:commandLink>
+                    </ui:repeat>
+                </div>
+            </div>
+        </h:form>
+    </div>
+
+    <h:panelGroup id="cargo-status" layout="block">
+        <h:panelGroup rendered="#{not empty track.cargo}" layout="block">
+            <div id="result">
+                <p>
+                    Cargo
+                    <ui:fragment rendered="#{showDetailsLink}">
+                        <strong>
+                            <h:link value="#{track.cargo.trackingId}"
+                                    outcome="/admin/show.xhtml"
+                                    title="Open itinerary details">
+                                <f:param name="trackingId" value="#{track.cargo.trackingId}"/>
+                            </h:link>
+                        </strong>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{not showDetailsLink}">
+                        <strong>#{track.cargo.trackingId}</strong>
+                    </ui:fragment>
+                    is currently <strong>#{track.cargo.statusText}</strong>.
+                </p>
+                <p>
+                    Estimated arrival in <strong>#{track.cargo.destinationName}</strong>:
+                    #{track.cargo.eta}
+                </p>
+                <ui:fragment rendered="#{not empty track.cargo.nextExpectedActivity}">
+                    <p>#{track.cargo.nextExpectedActivity}</p>
+                </ui:fragment>
+                <h:panelGroup rendered="#{track.cargo.misdirected}">
+                    <p class="notice-danger">
+                        <span aria-hidden="true">⚠</span>
+                        Cargo is misdirected.
+                    </p>
+                </h:panelGroup>
+            </div>
+
+            <section class="tracking-history">
+                <h2>Handling history</h2>
+                <ui:repeat value="#{track.cargo.events}" var="event">
+                    <p class="#{event.expected ? 'handling-event handling-event-expected' : 'handling-event handling-event-unexpected'}">
+                        <span aria-hidden="true">#{event.expected ? '✓' : '⚑'}</span>
+                        #{event.description}, at #{event.time}
+                    </p>
+                </ui:repeat>
+                <h:outputText value="There are no events recorded for #{track.cargo.trackingId}."
+                              rendered="#{empty track.cargo.events}"/>
+            </section>
+
+            <h:panelGroup rendered="#{showMap}" layout="block" styleClass="tracking-map-section">
+                <section class="live-map-panel" aria-label="Cargo route map">
+                    <div id="tracking-map"
+                         class="tracking-cargo-map"
+                         data-cargo-uri="#{request.contextPath}/rest/cargo/#{track.cargo.trackingId}"></div>
+                </section>
+            </h:panelGroup>
+        </h:panelGroup>
+
+        <h:outputText value="Cargo with tracking ID #{track.trackingId} not found."
+                      rendered="#{empty track.cargo and not empty track.trackingId}"/>
+    </h:panelGroup>
+
+    <script>
+        function handleTracking(event) {
+            if (event.status !== "success") {
+                return;
+            }
+            const mapElement = document.getElementById("tracking-map");
+            if (mapElement) {
+                CargoMap.initializeCargo({
+                    elementId: mapElement.id,
+                    cargoUri: mapElement.dataset.cargoUri
+                }).catch(function () {
+                    mapElement.textContent = "The cargo map could not be loaded.";
+                });
+            }
+        }
+    </script>
+</ui:composition>
